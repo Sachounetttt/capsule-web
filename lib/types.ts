@@ -38,3 +38,28 @@ export interface SearchResult {
   community_rating?: number
   community_rating_source?: string
 }
+
+export interface UserProfile {
+  id: string
+  display_name: string
+  avatar_url?: string
+  created_at: string
+}
+
+export type FriendshipStatus = 'pending' | 'accepted'
+
+export interface Friendship {
+  id: string
+  requester_id: string
+  addressee_id: string
+  status: FriendshipStatus
+  created_at: string
+  profile?: UserProfile
+}
+
+export interface FriendProfileSummary {
+  profile: UserProfile
+  stats: { movies: number; tvshows: number; games: number }
+  recent: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url' | 'date_added'>[]
+  favorites: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url'>[]
+}
