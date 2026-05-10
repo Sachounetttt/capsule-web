@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS config (
   value text NOT NULL
 );
 
+ALTER TABLE media_items ADD COLUMN IF NOT EXISTS wishlist boolean DEFAULT false;
 ALTER TABLE media_items ADD COLUMN IF NOT EXISTS platform text;
 ALTER TABLE media_items ADD COLUMN IF NOT EXISTS developer text;
 
