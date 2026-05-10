@@ -23,12 +23,16 @@ function AddPageInner() {
   const [results, setResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
   const [selected, setSelected] = useState<SearchResult | null>(null)
+  const [typeFromUrl, setTypeFromUrl] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Lire les query params après le mount pour éviter la divergence server/client
   useEffect(() => {
     const type = searchParams.get('type') as MediaType | null
-    if (type) setMediaType(type)
+    if (type) {
+      setMediaType(type)
+      setTypeFromUrl(true)
+    }
     const title = searchParams.get('title')
     if (title) {
       setSelected({
@@ -116,22 +120,24 @@ function AddPageInner() {
         </div>
 
         {/* Type selector */}
-        <div className="flex gap-2 mb-4">
-          {types.map(t => (
-            <button
-              key={t.value}
-              onClick={() => { setMediaType(t.value); setSelected(null); setResults([]); setQuery('') }}
-              className="flex-1 py-2 rounded-[12px] text-sm font-medium"
-              style={{
-                background: mediaType === t.value ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${mediaType === t.value ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                color: 'white',
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {!typeFromUrl && (
+          <div className="flex gap-2 mb-4">
+            {types.map(t => (
+              <button
+                key={t.value}
+                onClick={() => { setMediaType(t.value); setSelected(null); setResults([]); setQuery('') }}
+                className="flex-1 py-2 rounded-[12px] text-sm font-medium"
+                style={{
+                  background: mediaType === t.value ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${mediaType === t.value ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  color: 'white',
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Search */}
         {!selected && (
@@ -195,6 +201,7 @@ function AddPageInner() {
         ) : (
           <>
             <MediaForm
+              wishlist={destination === 'wishlist'}
               initial={
                 selected
                   ? {
