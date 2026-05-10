@@ -114,7 +114,7 @@ function AddPageInner() {
                 color: 'white',
               }}
             >
-              {dest === 'library' ? '📚 Bibliothèque' : '❤️ Wishlist'}
+              {dest === 'library' ? 'Bibliothèque' : 'Wishlist'}
             </button>
           ))}
         </div>
@@ -184,11 +184,13 @@ function AddPageInner() {
                 status: 'inProgress',
                 notes: '',
                 wishlist: true,
+                community_rating: selected.community_rating,
+                community_rating_source: selected.community_rating_source,
               })}
               className="py-3 rounded-[12px] font-semibold"
               style={{ background: '#F87171', color: 'white' }}
             >
-              ❤️ Ajouter à la wishlist
+              Ajouter à la wishlist
             </motion.button>
             <button
               onClick={() => setSelected(null)}
@@ -201,6 +203,7 @@ function AddPageInner() {
         ) : (
           <>
             <MediaForm
+              key={selected?.title ?? 'empty'}
               wishlist={destination === 'wishlist'}
               initial={
                 selected
@@ -215,6 +218,8 @@ function AddPageInner() {
                       total_seasons: selected.total_seasons,
                       platform: selected.platform,
                       developer: selected.developer,
+                      community_rating: selected.community_rating,
+                      community_rating_source: selected.community_rating_source,
                       status: 'inProgress',
                       notes: '',
                     }

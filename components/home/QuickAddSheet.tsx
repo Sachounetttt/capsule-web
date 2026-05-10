@@ -27,6 +27,8 @@ export default function QuickAddSheet({ item, mediaType, onClose }: Props) {
         status: 'inProgress',
         notes: '',
         wishlist: true,
+        community_rating: item.community_rating,
+        community_rating_source: item.community_rating_source,
       }),
     })
     onClose()
