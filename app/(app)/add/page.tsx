@@ -10,7 +10,6 @@ import type { MediaType, MediaItem, SearchResult } from '@/lib/types'
 const types: { value: MediaType; label: string }[] = [
   { value: 'movie', label: 'Film' },
   { value: 'tvshow', label: 'Série' },
-  { value: 'book', label: 'Livre' },
   { value: 'game', label: 'Jeu' },
 ]
 
@@ -71,11 +70,17 @@ function AddPageInner() {
       } catch { /* non-blocking */ }
     }
 
-    await fetch('/api/media', {
+    const res = await fetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Erreur inconnue' }))
+      alert(`Erreur lors de l'ajout : ${err.error}`)
+      return
+    }
 
     setTimeout(() => router.push(destination === 'wishlist' ? '/wishlist' : '/library'), 800)
   }
@@ -149,8 +154,7 @@ function AddPageInner() {
                 onChange={e => setQuery(e.target.value)}
                 placeholder={`Rechercher un ${
                   mediaType === 'movie' ? 'film' :
-                  mediaType === 'tvshow' ? 'série' :
-                  mediaType === 'game' ? 'jeu' : 'livre'
+                  mediaType === 'tvshow' ? 'série' : 'jeu'
                 }...`}
                 className="bg-transparent flex-1 outline-none text-sm"
                 style={{ color: 'white' }}
@@ -213,8 +217,6 @@ function AddPageInner() {
                       year: selected.year,
                       poster_url: selected.poster_url,
                       director: selected.director,
-                      author: selected.author,
-                      pages: selected.pages,
                       total_seasons: selected.total_seasons,
                       platform: selected.platform,
                       developer: selected.developer,

@@ -1,4 +1,4 @@
-import { buildMovieResult, buildTVResult, buildBookResult, buildGameResult } from '@/lib/search'
+import { buildMovieResult, buildTVResult, buildGameResult } from '@/lib/search'
 
 describe('search result builders', () => {
   it('buildMovieResult extrait les bons champs', () => {
@@ -18,18 +18,6 @@ describe('search result builders', () => {
     expect(result.poster_url).toBeUndefined()
   })
 
-  it('buildBookResult extrait les bons champs', () => {
-    const raw = {
-      title: 'Dune',
-      author_name: ['Frank Herbert'],
-      number_of_pages_median: 412,
-      cover_i: 9876,
-    }
-    const result = buildBookResult(raw)
-    expect(result.author).toBe('Frank Herbert')
-    expect(result.pages).toBe(412)
-    expect(result.poster_url).toBe('https://covers.openlibrary.org/b/id/9876-M.jpg')
-  })
 })
 
 describe('buildGameResult', () => {

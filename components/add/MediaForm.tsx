@@ -32,12 +32,6 @@ const CRITERIA: Record<string, { label: string; key: string }[]> = {
     { label: 'Réalisation', key: 'realisation' },
     { label: 'Rythme', key: 'rythme' },
   ],
-  book: [
-    { label: 'Histoire', key: 'histoire' },
-    { label: 'Écriture', key: 'ecriture' },
-    { label: 'Personnages', key: 'personnages' },
-    { label: 'Univers', key: 'univers' },
-  ],
   game: [
     { label: 'Graphisme', key: 'graphisme' },
     { label: 'Histoire', key: 'histoire' },
@@ -147,15 +141,6 @@ export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter', 
             style={{ ...inputStyle, flex: 1 }}
           />
         </div>
-      )}
-      {form.type === 'book' && (
-        <input
-          type="number"
-          value={form.pages ?? ''}
-          onChange={e => update('pages', parseInt(e.target.value) || undefined)}
-          placeholder="Nombre de pages (optionnel)"
-          style={inputStyle}
-        />
       )}
       {form.type === 'game' && (
         <>

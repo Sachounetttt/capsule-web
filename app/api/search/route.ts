@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { searchMovies, searchTV, searchBooks, searchGames } from '@/lib/search'
+import { searchMovies, searchTV, searchGames } from '@/lib/search'
 import type { MediaType, SearchResult } from '@/lib/types'
 
 export async function GET(req: NextRequest) {
@@ -15,7 +15,6 @@ export async function GET(req: NextRequest) {
     let results: SearchResult[]
     if (type === 'movie') results = await searchMovies(query)
     else if (type === 'tvshow') results = await searchTV(query)
-    else if (type === 'book') results = await searchBooks(query)
     else if (type === 'game') results = await searchGames(query)
     else results = []
 

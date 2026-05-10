@@ -14,7 +14,6 @@ const tabs = [
 const mediaTypes: { type: MediaType; label: string; icon: React.ElementType }[] = [
   { type: 'movie', label: 'Film', icon: Clapperboard },
   { type: 'tvshow', label: 'Série', icon: Tv },
-  { type: 'book', label: 'Livre', icon: BookOpen },
   { type: 'game', label: 'Jeu', icon: Gamepad2 },
 ]
 

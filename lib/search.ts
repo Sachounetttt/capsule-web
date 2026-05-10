@@ -31,18 +31,6 @@ export function buildTVResult(raw: Record<string, unknown>): SearchResult {
   }
 }
 
-export function buildBookResult(raw: Record<string, unknown>): SearchResult {
-  const coverI = raw.cover_i as number | undefined
-  return {
-    title: raw.title as string,
-    author: (raw.author_name as string[] | undefined)?.[0],
-    pages: raw.number_of_pages_median as number | undefined,
-    poster_url: coverI
-      ? `https://covers.openlibrary.org/b/id/${coverI}-M.jpg`
-      : undefined,
-  }
-}
-
 export async function searchMovies(query: string): Promise<SearchResult[]> {
   const res = await fetch(
     `${TMDB_BASE}/search/movie?query=${encodeURIComponent(query)}&api_key=${process.env.TMDB_API_KEY}`
@@ -59,15 +47,6 @@ export async function searchTV(query: string): Promise<SearchResult[]> {
   if (!res.ok) return []
   const data = await res.json()
   return (data.results ?? []).slice(0, 8).map(buildTVResult)
-}
-
-export async function searchBooks(query: string): Promise<SearchResult[]> {
-  const res = await fetch(
-    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&fields=title,author_name,number_of_pages_median,cover_i&limit=8`
-  )
-  if (!res.ok) return []
-  const data = await res.json()
-  return (data.docs ?? []).map(buildBookResult)
 }
 
 const RAWG_BASE = 'https://api.rawg.io/api'
