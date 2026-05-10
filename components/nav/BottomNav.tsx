@@ -2,12 +2,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookOpen, Plus, X, Clapperboard, Tv, Gamepad2 } from 'lucide-react'
+import { Home, BookOpen, Plus, X, Clapperboard, Tv, Gamepad2, Compass } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { MediaType } from '@/lib/types'
 
 const tabs = [
   { href: '/', icon: Home, label: 'Accueil' },
+  { href: '/discover', icon: Compass, label: 'Découvrir' },
   { href: '/library', icon: BookOpen, label: 'Bibliothèque' },
 ]
 
