@@ -88,7 +88,7 @@ export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter', 
         required
       />
 
-      {criteria.length > 0 && (
+      {criteria.length > 0 && form.status === 'completed' && (
         <div>
           <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Notes</p>
           <CriteriaRating
