@@ -1,7 +1,8 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import PosterHero from '@/components/detail/PosterHero'
 import AmbientGlow from '@/components/detail/AmbientGlow'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -37,11 +38,15 @@ export default async function MediaDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  const user = await getAuthUser()
+  if (!user) redirect('/login')
+
   const supabase = createServerClient()
   const { data: item } = await supabase
     .from('media_items')
     .select('*')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single()
 
   if (!item) notFound()
@@ -74,6 +79,7 @@ export default async function MediaDetailPage({
           title={item.title}
           itemId={item.id}
           dominantColor={item.dominant_color}
+          mediaType={item.type}
         />
       </div>
 

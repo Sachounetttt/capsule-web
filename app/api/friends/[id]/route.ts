@@ -36,13 +36,14 @@ export async function PATCH(
     return NextResponse.json({ ok: true })
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('friendships')
     .update({ status: 'accepted' })
     .eq('id', id)
     .select()
     .single()
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
 
