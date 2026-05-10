@@ -51,3 +51,39 @@ describe('buildGameResult', () => {
     expect(result.year).toBeUndefined()
   })
 })
+
+describe('community_rating extraction', () => {
+  it('buildMovieResult extrait vote_average comme community_rating TMDB', () => {
+    const raw = {
+      title: 'Inception',
+      release_date: '2010-07-16',
+      poster_path: '/path.jpg',
+      vote_average: 8.8,
+    }
+    const result = buildMovieResult(raw)
+    expect(result.community_rating).toBe(8.8)
+    expect(result.community_rating_source).toBe('TMDB')
+  })
+
+  it('buildMovieResult gère vote_average absent', () => {
+    const result = buildMovieResult({ title: 'Test', release_date: null, poster_path: null })
+    expect(result.community_rating).toBeUndefined()
+  })
+
+  it('buildGameResult extrait rating comme community_rating RAWG', () => {
+    const raw = {
+      name: 'Elden Ring',
+      released: '2022-02-25',
+      background_image: 'https://media.rawg.io/elden.jpg',
+      rating: 4.47,
+    }
+    const result = buildGameResult(raw)
+    expect(result.community_rating).toBe(4.47)
+    expect(result.community_rating_source).toBe('RAWG')
+  })
+
+  it('buildGameResult gère rating absent', () => {
+    const result = buildGameResult({ name: 'Test', released: null, background_image: null })
+    expect(result.community_rating).toBeUndefined()
+  })
+})

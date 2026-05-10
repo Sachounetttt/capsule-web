@@ -33,3 +33,6 @@ ALTER TABLE media_items DROP CONSTRAINT IF EXISTS media_items_type_check;
 ALTER TABLE media_items ADD CONSTRAINT media_items_type_check CHECK (type IN ('movie', 'tvshow', 'book', 'game'));
 
 ALTER TABLE media_items ADD COLUMN IF NOT EXISTS ratings_json jsonb;
+
+ALTER TABLE media_items ADD COLUMN IF NOT EXISTS community_rating float;
+ALTER TABLE media_items ADD COLUMN IF NOT EXISTS community_rating_source text;

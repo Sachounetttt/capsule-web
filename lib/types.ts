@@ -23,6 +23,8 @@ export interface MediaItem {
   isbn?: string
   platform?: string
   developer?: string
+  community_rating?: number
+  community_rating_source?: string
   ratings_json?: Record<string, CriterionValue>
   wishlist?: boolean
 }
@@ -39,4 +41,6 @@ export interface SearchResult {
   isbn?: string
   platform?: string
   developer?: string
+  community_rating?: number
+  community_rating_source?: string
 }

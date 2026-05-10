@@ -12,6 +12,8 @@ export function buildMovieResult(raw: Record<string, unknown>): SearchResult {
     poster_url: raw.poster_path
       ? `${TMDB_IMG}${raw.poster_path}`
       : undefined,
+    community_rating: raw.vote_average ? (raw.vote_average as number) : undefined,
+    community_rating_source: raw.vote_average ? 'TMDB' : undefined,
   }
 }
 
@@ -24,6 +26,8 @@ export function buildTVResult(raw: Record<string, unknown>): SearchResult {
     poster_url: raw.poster_path
       ? `${TMDB_IMG}${raw.poster_path}`
       : undefined,
+    community_rating: raw.vote_average ? (raw.vote_average as number) : undefined,
+    community_rating_source: raw.vote_average ? 'TMDB' : undefined,
   }
 }
 
@@ -73,6 +77,8 @@ export function buildGameResult(raw: Record<string, unknown>): SearchResult {
     title: raw.name as string,
     year: raw.released ? parseInt((raw.released as string).slice(0, 4)) : undefined,
     poster_url: (raw.background_image as string | null) ?? undefined,
+    community_rating: raw.rating ? (raw.rating as number) : undefined,
+    community_rating_source: raw.rating ? 'RAWG' : undefined,
   }
 }
 
