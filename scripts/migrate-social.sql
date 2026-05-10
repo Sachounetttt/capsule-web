@@ -18,8 +18,15 @@ CREATE TABLE IF NOT EXISTS friendships (
   addressee_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted')),
   created_at timestamptz DEFAULT now(),
-  UNIQUE (requester_id, addressee_id)
+  UNIQUE (requester_id, addressee_id),
+  CONSTRAINT no_self_friendship CHECK (requester_id != addressee_id)
 );
+
+-- 3a. Performance indexes for frequently queried columns
+CREATE INDEX IF NOT EXISTS idx_media_items_user_id ON media_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_requester ON friendships(requester_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_addressee ON friendships(addressee_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_display_name ON profiles(display_name);
 
 -- 4. Trigger : crée le profil automatiquement à chaque inscription Google
 CREATE OR REPLACE FUNCTION handle_new_user()
