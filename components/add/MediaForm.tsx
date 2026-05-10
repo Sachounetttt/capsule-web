@@ -2,8 +2,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check } from 'lucide-react'
-import StarRating from '@/components/ui/StarRating'
-import type { MediaItem, MediaStatus } from '@/lib/types'
+import CriteriaRating from '@/components/ui/CriteriaRating'
+import type { MediaItem, MediaStatus, CriterionValue } from '@/lib/types'
 
 type FormData = Omit<MediaItem, 'id' | 'date_added'>
 
@@ -11,14 +11,40 @@ interface Props {
   initial: Partial<FormData>
   onSubmit: (data: FormData) => Promise<void>
   submitLabel?: string
+  wishlist?: boolean
 }
 
 const statusOptions: { value: MediaStatus; label: string }[] = [
   { value: 'completed', label: 'Terminé' },
   { value: 'inProgress', label: 'En cours' },
-  { value: 'dropped', label: 'Abandonné' },
-  { value: 'abandoned', label: 'Dropped' },
 ]
+
+const CRITERIA: Record<string, { label: string; key: string }[]> = {
+  movie: [
+    { label: 'Histoire', key: 'histoire' },
+    { label: 'Réalisation', key: 'realisation' },
+    { label: 'Acteurs', key: 'acteurs' },
+    { label: 'Musique', key: 'musique' },
+  ],
+  tvshow: [
+    { label: 'Histoire', key: 'histoire' },
+    { label: 'Acteurs', key: 'acteurs' },
+    { label: 'Réalisation', key: 'realisation' },
+    { label: 'Rythme', key: 'rythme' },
+  ],
+  book: [
+    { label: 'Histoire', key: 'histoire' },
+    { label: 'Écriture', key: 'ecriture' },
+    { label: 'Personnages', key: 'personnages' },
+    { label: 'Univers', key: 'univers' },
+  ],
+  game: [
+    { label: 'Graphisme', key: 'graphisme' },
+    { label: 'Histoire', key: 'histoire' },
+    { label: 'Gameplay', key: 'gameplay' },
+    { label: 'Level Design', key: 'leveldesign' },
+  ],
+}
 
 const inputStyle = {
   background: 'rgba(255,255,255,0.05)',
@@ -31,7 +57,7 @@ const inputStyle = {
   width: '100%',
 }
 
-export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter' }: Props) {
+export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter', wishlist = false }: Props) {
   const [form, setForm] = useState<Partial<FormData>>(initial)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -42,12 +68,15 @@ export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter' }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.title || !form.type || !form.status) return
+    if (!form.title || !form.type) return
+    if (!wishlist && !form.status) return
     setLoading(true)
     await onSubmit(form as FormData)
     setDone(true)
     setLoading(false)
   }
+
+  const criteria = form.type ? (CRITERIA[form.type] ?? []) : []
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -59,36 +88,44 @@ export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter' }
         required
       />
 
-      <div>
-        <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Note</p>
-        <StarRating value={form.rating ?? 0} onChange={v => update('rating', v)} />
-      </div>
-
-      <div>
-        <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Statut</p>
-        <div className="flex flex-wrap gap-2">
-          {statusOptions.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => update('status', opt.value)}
-              className="px-3 py-1.5 rounded-full text-xs font-medium"
-              style={{
-                background: form.status === opt.value ? '#7C3AED' : 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'white',
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
+      {criteria.length > 0 && (
+        <div>
+          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Notes</p>
+          <CriteriaRating
+            criteria={criteria}
+            values={(form.ratings_json ?? {}) as Record<string, CriterionValue>}
+            onChange={v => update('ratings_json', v)}
+          />
         </div>
-      </div>
+      )}
+
+      {!wishlist && (
+        <div>
+          <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Statut</p>
+          <div className="flex flex-wrap gap-2">
+            {statusOptions.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => update('status', opt.value)}
+                className="px-3 py-1.5 rounded-full text-xs font-medium"
+                style={{
+                  background: form.status === opt.value ? '#7C3AED' : 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'white',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {form.type === 'movie' && (
         <input
           value={form.director ?? ''}
-          onChange={e => update('director', e.target.value)}
+          onChange={e => update('director', e.target.value || undefined)}
           placeholder="Réalisateur (optionnel)"
           style={inputStyle}
         />
@@ -147,9 +184,13 @@ export default function MediaForm({ initial, onSubmit, submitLabel = 'Ajouter' }
 
       <motion.button
         type="submit"
-        disabled={loading || !form.title || !form.status}
+        disabled={loading || !form.title || (!wishlist && !form.status)}
         className="py-3 rounded-[12px] font-semibold relative overflow-hidden"
-        style={{ background: '#7C3AED', color: 'white', opacity: loading || !form.title || !form.status ? 0.4 : 1 }}
+        style={{
+          background: '#7C3AED',
+          color: 'white',
+          opacity: loading || !form.title || (!wishlist && !form.status) ? 0.4 : 1,
+        }}
         whileTap={{ scale: 0.97 }}
       >
         <AnimatePresence mode="wait">
