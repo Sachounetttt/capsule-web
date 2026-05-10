@@ -6,7 +6,9 @@ import PosterHero from '@/components/detail/PosterHero'
 import AmbientGlow from '@/components/detail/AmbientGlow'
 import StatusBadge from '@/components/ui/StatusBadge'
 import StarRating from '@/components/ui/StarRating'
-import type { MediaStatus, CriterionValue } from '@/lib/types'
+import DeleteButton from '@/components/detail/DeleteButton'
+import FinishFlow from '@/components/detail/FinishFlow'
+import type { MediaStatus, CriterionValue, MediaType } from '@/lib/types'
 
 const typeLabel: Record<string, string> = {
   movie: 'Film',
@@ -167,6 +169,14 @@ export default async function MediaDetailPage({
           <ArrowLeft size={16} />
           Retour à la bibliothèque
         </Link>
+
+        {/* Finish flow */}
+        {item.status === 'inProgress' && (
+          <FinishFlow itemId={item.id} mediaType={item.type as MediaType} />
+        )}
+
+        {/* Delete */}
+        <DeleteButton itemId={item.id} />
       </div>
     </div>
   )
