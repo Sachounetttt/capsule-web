@@ -1,5 +1,6 @@
 export type MediaType = 'movie' | 'tvshow' | 'book' | 'game'
 export type MediaStatus = 'completed' | 'inProgress' | 'dropped' | 'abandoned'
+export type CriterionValue = { rating: number; review?: string }
 
 export interface MediaItem {
   id: string
@@ -22,6 +23,7 @@ export interface MediaItem {
   isbn?: string
   platform?: string
   developer?: string
+  ratings_json?: Record<string, CriterionValue>
   wishlist?: boolean
 }
 
