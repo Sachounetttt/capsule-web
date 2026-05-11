@@ -5,13 +5,16 @@ import SettingsSheet from '@/components/home/SettingsSheet'
 import DiscoverClient from '@/components/home/DiscoverClient'
 import WishlistPreview from '@/components/home/WishlistPreview'
 import { createServerClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 
 export default async function HomePage() {
+  const user = await getAuthUser()
   const supabase = createServerClient()
   const { data: items } = await supabase
     .from('media_items')
     .select('*')
     .eq('wishlist', false)
+    .eq('user_id', user?.id ?? '')
     .order('date_added', { ascending: false })
 
   const all = items ?? []
