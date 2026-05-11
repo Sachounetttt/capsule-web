@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
   const supabase = createClient()
 
   async function handleGoogleSignIn() {
@@ -22,6 +25,11 @@ export default function LoginPage() {
           <h1 className="text-4xl font-bold text-white mb-2">Capsule</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)' }}>Ton tracker de médias</p>
         </div>
+        {error && (
+          <p className="text-sm text-center px-4 py-2 rounded-xl" style={{ background: 'rgba(239,68,68,0.15)', color: '#F87171' }}>
+            {error}
+          </p>
+        )}
 
         <button
           onClick={handleGoogleSignIn}
