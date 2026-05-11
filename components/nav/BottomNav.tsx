@@ -2,14 +2,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookOpen, Plus, X, Clapperboard, Tv, Gamepad2, Compass } from 'lucide-react'
+import { Home, BookOpen, Plus, X, Clapperboard, Tv, Gamepad2, Compass, Users } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { MediaType } from '@/lib/types'
 
 const tabs = [
   { href: '/', icon: Home, label: 'Accueil' },
-  { href: '/discover', icon: Compass, label: 'Découvrir' },
-  { href: '/library', icon: BookOpen, label: 'Bibliothèque' },
+  { href: '/library', icon: BookOpen, label: 'Biblio' },
+  { href: '/friends', icon: Users, label: 'Amis' },
 ]
 
 const mediaTypes: { type: MediaType; label: string; icon: React.ElementType }[] = [
