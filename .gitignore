@@ -1,0 +1,26 @@
+# Dépendances
+node_modules/
+
+# Build Next.js
+.next/
+out/
+
+# Secrets et variables locales
+.env.local
+.env.*.local
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# TypeScript
+tsconfig.tsbuildinfo
