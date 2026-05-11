@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   if (type === 'game') {
     try {
       const res = await fetch(
-        `${RAWG_BASE}/games?ordering=-added&page_size=6&key=${process.env.RAWG_API_KEY}`
+        `${RAWG_BASE}/games?ordering=-added&page_size=12&key=${process.env.RAWG_API_KEY}`
       )
       if (!res.ok) return NextResponse.json([], { status: 200 })
       const data = await res.json()
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     )
     if (!res.ok) return NextResponse.json([], { status: 200 })
     const data = await res.json()
-    const results: SearchResult[] = (data.results ?? []).slice(0, 6).map((r: Record<string, unknown>) => ({
+    const results: SearchResult[] = (data.results ?? []).slice(0, 12).map((r: Record<string, unknown>) => ({
       title: (r.title ?? r.name) as string,
       year: r.release_date
         ? parseInt((r.release_date as string).slice(0, 4))

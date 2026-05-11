@@ -41,7 +41,7 @@ export default function SearchResults({ results, loading, onSelect }: Props) {
                 src={result.poster_url}
                 alt={result.title}
                 fill
-                className="object-contain"
+                className="object-cover"
                 unoptimized
               />
             ) : (

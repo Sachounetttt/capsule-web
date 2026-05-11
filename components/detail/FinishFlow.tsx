@@ -17,12 +17,6 @@ const CRITERIA: Record<string, { label: string; key: string }[]> = {
     { label: 'Réalisation', key: 'realisation' },
     { label: 'Rythme', key: 'rythme' },
   ],
-  book: [
-    { label: 'Histoire', key: 'histoire' },
-    { label: 'Écriture', key: 'ecriture' },
-    { label: 'Personnages', key: 'personnages' },
-    { label: 'Univers', key: 'univers' },
-  ],
   game: [
     { label: 'Graphisme', key: 'graphisme' },
     { label: 'Histoire', key: 'histoire' },
