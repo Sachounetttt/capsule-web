@@ -16,9 +16,10 @@ export default function FriendsPage() {
   useEffect(() => {
     fetch('/api/friends')
       .then(r => r.json())
-      .then(({ friends, pending }) => {
+      .then(({ friends, pending, sent }) => {
         setFriends(friends ?? [])
         setPending(pending ?? [])
+        setSentIds(new Set((sent ?? []).map((s: { addressee_id: string }) => s.addressee_id)))
       })
   }, [])
 

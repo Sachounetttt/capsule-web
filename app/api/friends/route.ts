@@ -28,7 +28,12 @@ export async function GET() {
     .eq('addressee_id', user.id)
     .eq('status', 'pending')
 
-  // Normalise: expose toujours le profil de "l'autre personne" sous la clé `profile`
+  const { data: sent } = await supabase
+    .from('friendships')
+    .select('id, addressee_id')
+    .eq('requester_id', user.id)
+    .eq('status', 'pending')
+
   const friends = (accepted ?? []).map((f: Record<string, unknown>) => ({
     id: f.id,
     status: f.status,
@@ -45,7 +50,7 @@ export async function GET() {
     profile: f.requester
   }))
 
-  return NextResponse.json({ friends, pending: normalizedPending })
+  return NextResponse.json({ friends, pending: normalizedPending, sent: sent ?? [] })
 }
 
 export async function POST(req: NextRequest) {
