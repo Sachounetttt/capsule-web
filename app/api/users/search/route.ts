@@ -9,16 +9,17 @@ export async function GET(req: NextRequest) {
 
   const q = new URL(req.url).searchParams.get('q')?.trim() ?? ''
 
-  if (q.length < 2) return NextResponse.json([])
-
   const supabase = createServerClient()
 
-  const { data } = await supabase
+  const query = supabase
     .from('profiles')
     .select('id, display_name, avatar_url')
-    .ilike('display_name', `%${q}%`)
     .neq('id', user.id)
-    .limit(10)
+    .limit(20)
+
+  if (q.length >= 2) query.ilike('display_name', `%${q}%`)
+
+  const { data } = await query
 
   return NextResponse.json(data ?? [])
 }

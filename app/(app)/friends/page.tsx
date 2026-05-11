@@ -24,11 +24,11 @@ export default function FriendsPage() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (searchQuery.length < 2) { setSearchResults([]); return }
     debounceRef.current = setTimeout(() => {
-      fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`)
-        .then(r => r.json())
-        .then(setSearchResults)
+      const url = searchQuery.length >= 2
+        ? `/api/users/search?q=${encodeURIComponent(searchQuery)}`
+        : '/api/users/search'
+      fetch(url).then(r => r.json()).then(setSearchResults)
     }, 300)
   }, [searchQuery])
 
@@ -71,9 +71,12 @@ export default function FriendsPage() {
         />
       </div>
 
-      {/* Search results */}
+      {/* Search results / all users */}
       {searchResults.length > 0 && (
         <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            {searchQuery.length >= 2 ? 'Résultats' : 'Tous les membres'}
+          </p>
           {searchResults.map(u => (
             <div key={u.id} className="glass rounded-2xl px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
