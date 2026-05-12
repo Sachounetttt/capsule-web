@@ -92,34 +92,30 @@ export default function FriendsPage() {
         />
       </div>
 
-      {/* Search results / all users */}
-      {searchResults.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            {searchQuery.length >= 2 ? 'Résultats' : 'Tous les membres'}
+      {/* Friends list */}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          Mes amis {friends.length > 0 && `· ${friends.length}`}
+        </p>
+        {friends.length === 0 && (
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Cherche des amis ci-dessous pour les ajouter.
           </p>
-          {searchResults.map(u => (
-            <div key={u.id} className="glass rounded-2xl px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {u.avatar_url
-                  ? <img src={u.avatar_url} className="rounded-full" style={{ width: 36, height: 36 }} alt="" />
-                  : <div className="rounded-full" style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }} />
-                }
-                <span className="font-medium">{u.display_name}</span>
-              </div>
-              <button
-                onClick={() => sendRequest(u.id)}
-                disabled={sentIds.has(u.id)}
-                className="flex items-center gap-2 text-sm font-medium disabled:opacity-40"
-                style={{ color: sentIds.has(u.id) ? 'rgba(255,255,255,0.4)' : 'var(--color-purple)' }}
-              >
-                <UserPlus size={16} />
-                {sentIds.has(u.id) ? 'Envoyé' : 'Ajouter'}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+        )}
+        {friends.map(f => (
+          <Link
+            key={f.id}
+            href={`/users/${f.profile?.id}`}
+            className="glass rounded-2xl px-4 py-3 flex items-center gap-3"
+          >
+            {f.profile?.avatar_url
+              ? <img src={f.profile.avatar_url} className="rounded-full" style={{ width: 36, height: 36 }} alt="" />
+              : <div className="rounded-full" style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }} />
+            }
+            <span className="font-medium">{f.profile?.display_name}</span>
+          </Link>
+        ))}
+      </div>
 
       {/* Pending requests */}
       {pending.length > 0 && (
@@ -188,30 +184,34 @@ export default function FriendsPage() {
         </div>
       )}
 
-      {/* Friends list */}
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Mes amis {friends.length > 0 && `· ${friends.length}`}
-        </p>
-        {friends.length === 0 && (
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Cherche des amis ci-dessus pour les ajouter.
+      {/* Search results / all users */}
+      {searchResults.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            {searchQuery.length >= 2 ? 'Résultats' : 'Tous les membres'}
           </p>
-        )}
-        {friends.map(f => (
-          <Link
-            key={f.id}
-            href={`/users/${f.profile?.id}`}
-            className="glass rounded-2xl px-4 py-3 flex items-center gap-3"
-          >
-            {f.profile?.avatar_url
-              ? <img src={f.profile.avatar_url} className="rounded-full" style={{ width: 36, height: 36 }} alt="" />
-              : <div className="rounded-full" style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }} />
-            }
-            <span className="font-medium">{f.profile?.display_name}</span>
-          </Link>
-        ))}
-      </div>
+          {searchResults.map(u => (
+            <div key={u.id} className="glass rounded-2xl px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {u.avatar_url
+                  ? <img src={u.avatar_url} className="rounded-full" style={{ width: 36, height: 36 }} alt="" />
+                  : <div className="rounded-full" style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }} />
+                }
+                <span className="font-medium">{u.display_name}</span>
+              </div>
+              <button
+                onClick={() => sendRequest(u.id)}
+                disabled={sentIds.has(u.id)}
+                className="flex items-center gap-2 text-sm font-medium disabled:opacity-40"
+                style={{ color: sentIds.has(u.id) ? 'rgba(255,255,255,0.4)' : 'var(--color-purple)' }}
+              >
+                <UserPlus size={16} />
+                {sentIds.has(u.id) ? 'Envoyé' : 'Ajouter'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
