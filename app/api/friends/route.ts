@@ -9,56 +9,47 @@ export async function GET() {
 
   const supabase = createServerClient()
 
-  const { data: accepted } = await supabase
-    .from('friendships')
-    .select(`
-      id, requester_id, addressee_id, status, created_at,
-      requester:profiles!friendships_requester_id_fkey(id, display_name, avatar_url),
-      addressee:profiles!friendships_addressee_id_fkey(id, display_name, avatar_url)
-    `)
-    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-    .eq('status', 'accepted')
+  const [{ data: acceptedRaw }, { data: pendingRaw }, { data: sentRaw }] = await Promise.all([
+    supabase.from('friendships').select('id, requester_id, addressee_id, status, created_at')
+      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+      .eq('status', 'accepted'),
+    supabase.from('friendships').select('id, requester_id, addressee_id, status, created_at')
+      .eq('addressee_id', user.id)
+      .eq('status', 'pending'),
+    supabase.from('friendships').select('id, addressee_id')
+      .eq('requester_id', user.id)
+      .eq('status', 'pending'),
+  ])
 
-  const { data: pending } = await supabase
-    .from('friendships')
-    .select(`
-      id, requester_id, addressee_id, status, created_at,
-      requester:profiles!friendships_requester_id_fkey(id, display_name, avatar_url)
-    `)
-    .eq('addressee_id', user.id)
-    .eq('status', 'pending')
+  // Collect all profile IDs to fetch in one query
+  const profileIds = new Set<string>()
+  for (const f of acceptedRaw ?? []) { profileIds.add(f.requester_id); profileIds.add(f.addressee_id) }
+  for (const f of pendingRaw ?? []) { profileIds.add(f.requester_id) }
+  for (const f of sentRaw ?? []) { profileIds.add(f.addressee_id) }
 
-  const { data: sentRaw } = await supabase
-    .from('friendships')
-    .select('id, addressee_id')
-    .eq('requester_id', user.id)
-    .eq('status', 'pending')
-
-  const sentAddresseeIds = (sentRaw ?? []).map(s => s.addressee_id)
-  const { data: sentProfiles } = sentAddresseeIds.length > 0
-    ? await supabase.from('profiles').select('id, display_name, avatar_url').in('id', sentAddresseeIds)
+  const { data: profilesData } = profileIds.size > 0
+    ? await supabase.from('profiles').select('id, display_name, avatar_url').in('id', [...profileIds])
     : { data: [] }
 
-  const profileMap = Object.fromEntries((sentProfiles ?? []).map(p => [p.id, p]))
-  const sent = (sentRaw ?? []).map(s => ({ ...s, addressee: profileMap[s.addressee_id] ?? null }))
+  const profiles = Object.fromEntries((profilesData ?? []).map(p => [p.id, p]))
 
-  const friends = (accepted ?? []).map((f: Record<string, unknown>) => ({
-    id: f.id,
-    status: f.status,
-    created_at: f.created_at,
-    profile: f.requester_id === user.id ? f.addressee : f.requester
+  const friends = (acceptedRaw ?? []).map(f => ({
+    id: f.id, status: f.status, created_at: f.created_at,
+    profile: profiles[f.requester_id === user.id ? f.addressee_id : f.requester_id] ?? null,
   }))
 
-  const normalizedPending = (pending ?? []).map((f: Record<string, unknown>) => ({
-    id: f.id,
-    requester_id: f.requester_id,
-    addressee_id: f.addressee_id,
-    status: f.status,
-    created_at: f.created_at,
-    profile: f.requester
+  const pending = (pendingRaw ?? []).map(f => ({
+    id: f.id, requester_id: f.requester_id, addressee_id: f.addressee_id,
+    status: f.status, created_at: f.created_at,
+    profile: profiles[f.requester_id] ?? null,
   }))
 
-  return NextResponse.json({ friends, pending: normalizedPending, sent: sent ?? [] })
+  const sent = (sentRaw ?? []).map(s => ({
+    id: s.id, addressee_id: s.addressee_id,
+    addressee: profiles[s.addressee_id] ?? null,
+  }))
+
+  return NextResponse.json({ friends, pending, sent })
 }
 
 export async function POST(req: NextRequest) {
