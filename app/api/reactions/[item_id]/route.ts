@@ -12,11 +12,12 @@ export async function DELETE(
   const { item_id } = await params
   const supabase = createServerClient()
 
-  await supabase
+  const { error } = await supabase
     .from('reactions')
     .delete()
     .eq('item_id', item_id)
     .eq('from_user_id', user.id)
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

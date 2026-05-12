@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   const { item_id, emoji } = await req.json()
   if (!item_id || !VALID_EMOJIS.includes(emoji)) {
-    return NextResponse.json({ error: 'Invalid' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid item_id or emoji' }, { status: 400 })
   }
 
   const supabase = createServerClient()
