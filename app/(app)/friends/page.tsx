@@ -5,9 +5,16 @@ import Link from 'next/link'
 import { Search, UserPlus, Check, X } from 'lucide-react'
 import type { Friendship, UserProfile } from '@/lib/types'
 
+interface SentRequest {
+  id: string
+  addressee_id: string
+  addressee?: UserProfile
+}
+
 export default function FriendsPage() {
   const [friends, setFriends] = useState<Friendship[]>([])
   const [pending, setPending] = useState<Friendship[]>([])
+  const [sent, setSent] = useState<SentRequest[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<UserProfile[]>([])
   const [sentIds, setSentIds] = useState<Set<string>>(new Set())
@@ -19,6 +26,7 @@ export default function FriendsPage() {
       .then(({ friends, pending, sent }) => {
         setFriends(friends ?? [])
         setPending(pending ?? [])
+        setSent(sent ?? [])
         setSentIds(new Set((sent ?? []).map((s: { addressee_id: string }) => s.addressee_id)))
       })
   }, [])
@@ -39,7 +47,19 @@ export default function FriendsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ addressee_id: addresseeId }),
     })
-    if (res.ok) setSentIds(prev => new Set(prev).add(addresseeId))
+    if (res.ok) {
+      setSentIds(prev => new Set(prev).add(addresseeId))
+      const updated = await fetch('/api/friends').then(r => r.json())
+      setSent(updated.sent ?? [])
+    }
+  }
+
+  async function cancelRequest(id: string, addresseeId: string) {
+    const res = await fetch(`/api/friends/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setSent(prev => prev.filter(s => s.id !== id))
+      setSentIds(prev => { const next = new Set(prev); next.delete(addresseeId); return next })
+    }
   }
 
   async function respondToRequest(id: string, action: 'accept' | 'reject') {
@@ -132,6 +152,37 @@ export default function FriendsPage() {
                   <X size={16} />
                 </button>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sent requests */}
+      {sent.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Demandes envoyées · {sent.length}
+          </p>
+          {sent.map(s => (
+            <div key={s.id} className="glass rounded-2xl px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {s.addressee?.avatar_url
+                  ? <img src={s.addressee.avatar_url} className="rounded-full" style={{ width: 36, height: 36 }} alt="" />
+                  : <div className="rounded-full" style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }} />
+                }
+                <div>
+                  <span className="font-medium">{s.addressee?.display_name ?? '…'}</span>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>En attente</p>
+                </div>
+              </div>
+              <button
+                onClick={() => cancelRequest(s.id, s.addressee_id)}
+                className="flex items-center gap-1 text-xs font-medium"
+                style={{ color: '#F87171' }}
+              >
+                <X size={14} />
+                Annuler
+              </button>
             </div>
           ))}
         </div>

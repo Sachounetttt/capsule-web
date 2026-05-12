@@ -30,7 +30,10 @@ export async function GET() {
 
   const { data: sent } = await supabase
     .from('friendships')
-    .select('id, addressee_id')
+    .select(`
+      id, addressee_id,
+      addressee:profiles!friendships_addressee_id_fkey(id, display_name, avatar_url)
+    `)
     .eq('requester_id', user.id)
     .eq('status', 'pending')
 
