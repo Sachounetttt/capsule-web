@@ -22,6 +22,44 @@ export default async function HomePage() {
   const inProgress = all.filter(i => i.status === 'inProgress').length
   const recent = all.slice(0, 6)
 
+  // Section "Vos amis ont adoré"
+  const { data: friendships } = await supabase
+    .from('friendships')
+    .select('requester_id, addressee_id')
+    .or(`requester_id.eq.${user?.id ?? ''},addressee_id.eq.${user?.id ?? ''}`)
+    .eq('status', 'accepted')
+
+  const friendIds = (friendships ?? []).map(f =>
+    f.requester_id === user?.id ? f.addressee_id : f.requester_id
+  )
+
+  const { data: friendItems } = friendIds.length > 0
+    ? await supabase
+        .from('media_items')
+        .select('title, type, year, poster_url, rating')
+        .in('user_id', friendIds)
+        .gte('rating', 4)
+        .eq('wishlist', false)
+        .not('poster_url', 'is', null)
+    : { data: [] }
+
+  const myTitles = new Set(all.map(i => i.title.toLowerCase().trim()))
+  const titleMap = new Map<string, { title: string; type: string; year?: number; poster_url: string; ratings: number[] }>()
+
+  for (const item of friendItems ?? []) {
+    const key = item.title.toLowerCase().trim()
+    if (myTitles.has(key)) continue
+    if (!titleMap.has(key)) {
+      titleMap.set(key, { title: item.title, type: item.type, year: item.year, poster_url: item.poster_url, ratings: [] })
+    }
+    titleMap.get(key)!.ratings.push(item.rating)
+  }
+
+  const friendsLoved = [...titleMap.values()]
+    .map(({ ratings, ...rest }) => ({ ...rest, avgRating: ratings.reduce((a, b) => a + b, 0) / ratings.length }))
+    .sort((a, b) => b.avgRating - a.avgRating)
+    .slice(0, 12)
+
   return (
     <div className="min-h-screen">
       <div
@@ -55,6 +93,36 @@ export default async function HomePage() {
             </h2>
             <div className="px-4">
               <RecentScroll items={recent} />
+            </div>
+          </div>
+        )}
+
+        {friendsLoved.length > 0 && (
+          <div className="mb-6">
+            <h2
+              className="text-sm font-semibold uppercase tracking-widest mb-3 px-4"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+            >
+              Vos amis ont adoré
+            </h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 px-4" style={{ scrollbarWidth: 'none' }}>
+              {friendsLoved.map((item, i) => (
+                <div key={i} className="flex-shrink-0" style={{ width: 112 }}>
+                  <div className="glass rounded-[12px] overflow-hidden relative" style={{ width: 112, height: 160 }}>
+                    <img
+                      src={item.poster_url}
+                      alt={item.title}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)', width: 112 }}>
+                    {item.title}
+                  </p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    {'⭐'.repeat(Math.round(item.avgRating))}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         )}
