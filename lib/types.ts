@@ -57,9 +57,18 @@ export interface Friendship {
   profile?: UserProfile
 }
 
+export type ComparisonItem = Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url'>
+
+export interface Comparison {
+  score: number
+  common: ComparisonItem[]
+  toDiscover: ComparisonItem[]
+}
+
 export interface FriendProfileSummary {
   profile: UserProfile
   stats: { movies: number; tvshows: number; games: number }
   recent: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url' | 'date_added'>[]
   favorites: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url'>[]
+  comparison: Comparison
 }
