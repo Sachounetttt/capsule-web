@@ -36,23 +36,32 @@ export default async function HomePage() {
   const { data: friendItems } = friendIds.length > 0
     ? await supabase
         .from('media_items')
-        .select('title, type, year, poster_url, rating')
+        .select('title, type, year, poster_url, rating, ratings_json')
         .in('user_id', friendIds)
-        .gte('rating', 4)
         .eq('wishlist', false)
         .not('poster_url', 'is', null)
     : { data: [] }
+
+  function getAvgRating(item: { rating?: number | null; ratings_json?: Record<string, { rating: number }> | null }): number | null {
+    if (item.ratings_json && Object.keys(item.ratings_json).length > 0) {
+      const vals = Object.values(item.ratings_json).map(v => v.rating).filter(r => typeof r === 'number')
+      return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+    }
+    return item.rating ?? null
+  }
 
   const myTitles = new Set(all.map(i => i.title.toLowerCase().trim()))
   const titleMap = new Map<string, { title: string; type: string; year?: number; poster_url: string; ratings: number[] }>()
 
   for (const item of friendItems ?? []) {
+    const avg = getAvgRating(item)
+    if (avg === null || avg < 4) continue
     const key = item.title.toLowerCase().trim()
     if (myTitles.has(key)) continue
     if (!titleMap.has(key)) {
-      titleMap.set(key, { title: item.title, type: item.type, year: item.year, poster_url: item.poster_url, ratings: [] })
+      titleMap.set(key, { title: item.title, type: item.type, year: item.year ?? undefined, poster_url: item.poster_url, ratings: [] })
     }
-    titleMap.get(key)!.ratings.push(item.rating)
+    titleMap.get(key)!.ratings.push(avg)
   }
 
   const friendsLoved = [...titleMap.values()]
