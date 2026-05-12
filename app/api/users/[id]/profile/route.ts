@@ -40,7 +40,7 @@ function computeComparison(
     .filter(i => i.status === 'completed' && !myMap.has(normalize(i.title)) && i.rating)
     .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     .slice(0, 6)
-    .map(i => ({ id: i.id, title: i.title, type: i.type, year: i.year ?? undefined, poster_url: i.poster_url ?? undefined }))
+    .map(i => ({ id: i.id, title: i.title, type: i.type as MediaType, year: i.year ?? undefined, poster_url: i.poster_url ?? undefined }))
 
   return { score, common, toDiscover }
 }
