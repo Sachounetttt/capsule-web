@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth'
-import type { FriendProfileSummary, Comparison } from '@/lib/types'
+import type { FriendProfileSummary, Comparison, MediaType } from '@/lib/types'
 
 function computeComparison(
   myAll: { title: string; rating?: number | null; status: string }[],
@@ -33,7 +33,7 @@ function computeComparison(
 
   const common = commonKeys.slice(0, 6).map(k => {
     const f = friendMap.get(k)!
-    return { id: f.id, title: f.title, type: f.type, year: f.year ?? undefined, poster_url: f.poster_url ?? undefined }
+    return { id: f.id, title: f.title, type: f.type as MediaType, year: f.year ?? undefined, poster_url: f.poster_url ?? undefined }
   })
 
   const toDiscover = friendAll
