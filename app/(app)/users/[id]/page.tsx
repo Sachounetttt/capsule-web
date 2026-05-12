@@ -106,6 +106,70 @@ export default function UserProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Taste comparison */}
+      {data.comparison && (
+        <div className="flex flex-col gap-4">
+          {/* Score */}
+          <div className="glass rounded-2xl p-5 flex flex-col items-center gap-1">
+            <span
+              className="text-5xl font-bold"
+              style={{
+                color: data.comparison.score >= 65
+                  ? '#4ADE80'
+                  : data.comparison.score >= 35
+                  ? '#FACC15'
+                  : '#F87171'
+              }}
+            >
+              {data.comparison.score}%
+            </span>
+            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              de goûts similaires
+            </span>
+          </div>
+
+          {/* Common */}
+          {data.comparison.common.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                En commun · {data.comparison.common.length}
+              </p>
+              <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {data.comparison.common.map(item => (
+                  <div key={item.id} className="flex-shrink-0" style={{ width: 90 }}>
+                    {item.poster_url
+                      ? <img src={item.poster_url} className="rounded-xl object-cover" style={{ width: 90, height: 130 }} alt={item.title} />
+                      : <div className="rounded-xl" style={{ width: 90, height: 130, background: 'rgba(255,255,255,0.1)' }} />
+                    }
+                    <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* To discover */}
+          {data.comparison.toDiscover.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                À découvrir chez {profile.display_name.split(' ')[0]}
+              </p>
+              <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {data.comparison.toDiscover.map(item => (
+                  <div key={item.id} className="flex-shrink-0" style={{ width: 90 }}>
+                    {item.poster_url
+                      ? <img src={item.poster_url} className="rounded-xl object-cover" style={{ width: 90, height: 130 }} alt={item.title} />
+                      : <div className="rounded-xl" style={{ width: 90, height: 130, background: 'rgba(255,255,255,0.15)' }} />
+                    }
+                    <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
