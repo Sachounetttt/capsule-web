@@ -28,14 +28,19 @@ export async function GET() {
     .eq('addressee_id', user.id)
     .eq('status', 'pending')
 
-  const { data: sent } = await supabase
+  const { data: sentRaw } = await supabase
     .from('friendships')
-    .select(`
-      id, addressee_id,
-      addressee:profiles!friendships_addressee_id_fkey(id, display_name, avatar_url)
-    `)
+    .select('id, addressee_id')
     .eq('requester_id', user.id)
     .eq('status', 'pending')
+
+  const sentAddresseeIds = (sentRaw ?? []).map(s => s.addressee_id)
+  const { data: sentProfiles } = sentAddresseeIds.length > 0
+    ? await supabase.from('profiles').select('id, display_name, avatar_url').in('id', sentAddresseeIds)
+    : { data: [] }
+
+  const profileMap = Object.fromEntries((sentProfiles ?? []).map(p => [p.id, p]))
+  const sent = (sentRaw ?? []).map(s => ({ ...s, addressee: profileMap[s.addressee_id] ?? null }))
 
   const friends = (accepted ?? []).map((f: Record<string, unknown>) => ({
     id: f.id,
