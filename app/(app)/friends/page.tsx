@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { Search, UserPlus, Check, X } from 'lucide-react'
+import { Search, UserPlus, Check, X, UserCheck } from 'lucide-react'
 import type { Friendship, UserProfile } from '@/lib/types'
 
 interface SentRequest {
@@ -199,15 +199,22 @@ export default function FriendsPage() {
                 }
                 <span className="font-medium">{u.display_name}</span>
               </div>
-              <button
-                onClick={() => sendRequest(u.id)}
-                disabled={sentIds.has(u.id)}
-                className="flex items-center gap-2 text-sm font-medium disabled:opacity-40"
-                style={{ color: sentIds.has(u.id) ? 'rgba(255,255,255,0.4)' : 'var(--color-purple)' }}
-              >
-                <UserPlus size={16} />
-                {sentIds.has(u.id) ? 'Envoyé' : 'Ajouter'}
-              </button>
+              {friends.some(f => f.profile?.id === u.id) ? (
+                <span className="flex items-center gap-2 text-sm font-medium" style={{ color: '#4ADE80' }}>
+                  <UserCheck size={16} />
+                  Ami(e)
+                </span>
+              ) : (
+                <button
+                  onClick={() => sendRequest(u.id)}
+                  disabled={sentIds.has(u.id)}
+                  className="flex items-center gap-2 text-sm font-medium disabled:opacity-40"
+                  style={{ color: sentIds.has(u.id) ? 'rgba(255,255,255,0.4)' : 'var(--color-purple)' }}
+                >
+                  <UserPlus size={16} />
+                  {sentIds.has(u.id) ? 'Envoyé' : 'Ajouter'}
+                </button>
+              )}
             </div>
           ))}
         </div>
