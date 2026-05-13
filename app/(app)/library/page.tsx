@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { Search } from 'lucide-react'
-import FilterPills, { type Filter } from '@/components/library/FilterPills'
+import FilterPills, { type Filter, type StatusFilter } from '@/components/library/FilterPills'
 import MediaCard from '@/components/library/MediaCard'
 import ShimmerCard from '@/components/ui/ShimmerCard'
 import type { MediaItem } from '@/lib/types'
@@ -12,6 +12,7 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
@@ -29,9 +30,10 @@ export default function LibraryPage() {
     const source = filter === 'wishlist' ? wishlistItems : items
     let list = [...source]
     if (filter !== 'all' && filter !== 'wishlist') list = list.filter(i => i.type === filter)
+    if (statusFilter !== 'all') list = list.filter(i => i.status === statusFilter)
     if (query) list = list.filter(i => i.title.toLowerCase().includes(query.toLowerCase()))
     return list
-  }, [items, wishlistItems, filter, query])
+  }, [items, wishlistItems, filter, statusFilter, query])
 
   const visible = useMemo(
     () => (showAll ? displayed : displayed.slice(0, 5)),
@@ -40,6 +42,7 @@ export default function LibraryPage() {
 
   function handleFilterChange(f: Filter) {
     setFilter(f)
+    setStatusFilter('all')
     setShowAll(false)
   }
 
@@ -64,7 +67,12 @@ export default function LibraryPage() {
       </div>
 
       <div className="mb-4">
-        <FilterPills filter={filter} onFilter={handleFilterChange} />
+        <FilterPills
+          filter={filter}
+          onFilter={handleFilterChange}
+          statusFilter={statusFilter}
+          onStatusFilter={setStatusFilter}
+        />
       </div>
 
       <div className="flex flex-col gap-3">
