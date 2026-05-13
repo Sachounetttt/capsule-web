@@ -13,7 +13,7 @@ export default function StarRating({ value, onChange, readonly }: Props) {
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map(star => {
         const isFull = star <= value
-        const isHalf = !isFull && star - 0.5 === value
+        const isHalf = !isFull && Math.abs((star - 0.5) - value) < 0.01
 
         return (
           <motion.div
@@ -57,14 +57,14 @@ export default function StarRating({ value, onChange, readonly }: Props) {
                   onClick={() => onChange?.(star - 0.5)}
                   aria-label={`${star - 0.5} étoiles`}
                   className="absolute inset-y-0 left-0"
-                  style={{ width: '50%', background: 'transparent' }}
+                  style={{ width: '50%', background: 'transparent', border: 'none', padding: 0 }}
                 />
                 <button
                   type="button"
                   onClick={() => onChange?.(star)}
                   aria-label={`${star} étoiles`}
                   className="absolute inset-y-0 right-0"
-                  style={{ width: '50%', background: 'transparent' }}
+                  style={{ width: '50%', background: 'transparent', border: 'none', padding: 0 }}
                 />
               </>
             )}
