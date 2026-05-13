@@ -128,7 +128,7 @@ export default async function HomePage() {
                     {item.title}
                   </p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                    {'⭐'.repeat(Math.round(item.avgRating))}
+                    {item.avgRating.toFixed(1).replace('.', ',')}/5
                   </p>
                 </div>
               ))}
