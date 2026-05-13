@@ -1,49 +1,63 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { Search } from 'lucide-react'
-import FilterPills from '@/components/library/FilterPills'
+import FilterPills, { type Filter } from '@/components/library/FilterPills'
 import MediaCard from '@/components/library/MediaCard'
 import ShimmerCard from '@/components/ui/ShimmerCard'
-import type { MediaItem, MediaType } from '@/lib/types'
-
-type Filter = MediaType | 'all'
-type Sort = 'date' | 'rating' | 'title'
+import type { MediaItem } from '@/lib/types'
 
 export default function LibraryPage() {
   const [items, setItems] = useState<MediaItem[]>([])
+  const [wishlistItems, setWishlistItems] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
-  const [sort, setSort] = useState<Sort>('date')
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
-    fetch('/api/media')
-      .then(r => r.json())
-      .then(data => { setItems(Array.isArray(data) ? data : []); setLoading(false) })
+    Promise.all([
+      fetch('/api/media').then(r => r.json()),
+      fetch('/api/media?wishlist=true').then(r => r.json()),
+    ])
+      .then(([lib, wish]) => {
+        setItems(Array.isArray(lib) ? lib : [])
+        setWishlistItems(Array.isArray(wish) ? wish : [])
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
   const displayed = useMemo(() => {
-    let list = [...items]
-    if (filter !== 'all') list = list.filter(i => i.type === filter)
+    const source = filter === 'wishlist' ? wishlistItems : items
+    let list = [...source]
+    if (filter !== 'all' && filter !== 'wishlist') list = list.filter(i => i.type === filter)
     if (query) list = list.filter(i => i.title.toLowerCase().includes(query.toLowerCase()))
-    if (sort === 'rating') list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-    else if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title))
     return list
-  }, [items, filter, sort, query])
+  }, [items, wishlistItems, filter, query])
+
+  const visible = useMemo(
+    () => (showAll ? displayed : displayed.slice(0, 5)),
+    [displayed, showAll]
+  )
+
+  function handleFilterChange(f: Filter) {
+    setFilter(f)
+    setShowAll(false)
+  }
 
   function handleDelete(id: string) {
-    setItems(prev => prev.filter(i => i.id !== id))
+    if (filter === 'wishlist') {
+      setWishlistItems(prev => prev.filter(i => i.id !== id))
+    } else {
+      setItems(prev => prev.filter(i => i.id !== id))
+    }
   }
 
   return (
     <div className="px-4 pb-4" style={{ paddingTop: '3.5rem' }}>
       <h1 className="text-3xl font-bold tracking-tight mb-4">Bibliothèque</h1>
 
-      {/* Search bar */}
-      <div
-        className="glass rounded-[12px] flex items-center gap-2 px-3 py-2 mb-3"
-      >
+      <div className="glass rounded-[12px] flex items-center gap-2 px-3 py-2 mb-3">
         <Search size={16} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
         <input
           value={query}
@@ -54,18 +68,16 @@ export default function LibraryPage() {
         />
       </div>
 
-      {/* Filter pills */}
       <div className="mb-4">
-        <FilterPills filter={filter} sort={sort} onFilter={setFilter} onSort={setSort} />
+        <FilterPills filter={filter} onFilter={handleFilterChange} />
       </div>
 
-      {/* List */}
       <div className="flex flex-col gap-3">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <ShimmerCard key={i} className="h-24" />
             ))
-          : displayed.map((item, i) => (
+          : visible.map((item, i) => (
               <MediaCard key={item.id} item={item} index={i} onDelete={handleDelete} />
             ))
         }
@@ -78,6 +90,20 @@ export default function LibraryPage() {
           </p>
         )}
       </div>
+
+      {!loading && !showAll && displayed.length > 5 && (
+        <button
+          onClick={() => setShowAll(true)}
+          className="w-full mt-3 py-3 rounded-[12px] text-sm font-medium"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(255,255,255,0.5)',
+          }}
+        >
+          Afficher plus ({displayed.length - 5} de plus)
+        </button>
+      )}
     </div>
   )
 }
