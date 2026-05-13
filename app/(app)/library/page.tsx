@@ -15,16 +15,14 @@ export default function LibraryPage() {
   const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       fetch('/api/media').then(r => r.json()),
       fetch('/api/media?wishlist=true').then(r => r.json()),
-    ])
-      .then(([lib, wish]) => {
-        setItems(Array.isArray(lib) ? lib : [])
-        setWishlistItems(Array.isArray(wish) ? wish : [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    ]).then(([lib, wish]) => {
+      if (lib.status === 'fulfilled') setItems(Array.isArray(lib.value) ? lib.value : [])
+      if (wish.status === 'fulfilled') setWishlistItems(Array.isArray(wish.value) ? wish.value : [])
+      setLoading(false)
+    })
   }, [])
 
   const displayed = useMemo(() => {
@@ -46,11 +44,8 @@ export default function LibraryPage() {
   }
 
   function handleDelete(id: string) {
-    if (filter === 'wishlist') {
-      setWishlistItems(prev => prev.filter(i => i.id !== id))
-    } else {
-      setItems(prev => prev.filter(i => i.id !== id))
-    }
+    setItems(prev => prev.filter(i => i.id !== id))
+    setWishlistItems(prev => prev.filter(i => i.id !== id))
   }
 
   return (
@@ -61,7 +56,7 @@ export default function LibraryPage() {
         <Search size={16} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
         <input
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={e => { setQuery(e.target.value); setShowAll(false) }}
           placeholder="Rechercher..."
           className="bg-transparent flex-1 outline-none text-sm"
           style={{ color: 'white' }}
