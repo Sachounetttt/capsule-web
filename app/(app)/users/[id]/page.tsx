@@ -5,15 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import type { FriendProfileSummary } from '@/lib/types'
 
-type ReactionEntry = { from_user_id: string; emoji: string; display_name: string; is_mine: boolean }
-type ReactionsMap = Record<string, ReactionEntry[]>
-
 export default function UserProfilePage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [data, setData] = useState<FriendProfileSummary | null>(null)
   const [error, setError] = useState(false)
-  const [reactions, setReactions] = useState<ReactionsMap>({})
 
   useEffect(() => {
     fetch(`/api/users/${id}/profile`)
@@ -21,15 +17,6 @@ export default function UserProfilePage() {
       .then(setData)
       .catch(() => setError(true))
   }, [id])
-
-  useEffect(() => {
-    if (!data) return
-    const ids = data.recent.map(i => i.id).join(',')
-    if (!ids) return
-    fetch(`/api/reactions?item_ids=${ids}`)
-      .then(r => r.json())
-      .then(setReactions)
-  }, [data])
 
   if (error) {
     return (
@@ -48,27 +35,6 @@ export default function UserProfilePage() {
   }
 
   const { profile, stats, recent, favorites } = data
-
-  async function handleReact(itemId: string, emoji: string) {
-    const current = (reactions[itemId] ?? []).find(r => r.is_mine)
-    const isSame = current?.emoji === emoji
-
-    setReactions(prev => {
-      const updated = (prev[itemId] ?? []).filter(r => !r.is_mine)
-      if (!isSame) updated.push({ from_user_id: '', emoji, display_name: 'Moi', is_mine: true })
-      return { ...prev, [itemId]: updated }
-    })
-
-    if (isSame) {
-      await fetch(`/api/reactions/${itemId}`, { method: 'DELETE' })
-    } else {
-      await fetch('/api/reactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: itemId, emoji }),
-      })
-    }
-  }
 
   return (
     <div className="px-4 pt-16 pb-8 flex flex-col gap-6 max-w-lg mx-auto">
@@ -115,21 +81,6 @@ export default function UserProfilePage() {
                   : <div className="rounded-xl" style={{ width: 90, height: 130, background: 'rgba(255,255,255,0.1)' }} />
                 }
                 <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.title}</p>
-                <div className="flex gap-0.5 mt-1 justify-center">
-                  {['🔥', '👀', '✅', '😴'].map(e => {
-                    const isActive = (reactions[item.id] ?? []).some(r => r.is_mine && r.emoji === e)
-                    return (
-                      <button
-                        key={e}
-                        onClick={() => handleReact(item.id, e)}
-                        className="text-sm rounded-md px-0.5"
-                        style={{ background: isActive ? 'rgba(255,255,255,0.15)' : 'transparent' }}
-                      >
-                        {e}
-                      </button>
-                    )
-                  })}
-                </div>
               </div>
             ))}
           </div>
