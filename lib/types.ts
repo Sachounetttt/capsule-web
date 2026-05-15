@@ -72,3 +72,22 @@ export interface FriendProfileSummary {
   favorites: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url'>[]
   comparison: Comparison
 }
+
+export interface NotificationSharePayload {
+  sender_id: string
+  sender_name: string
+  media_title: string
+  media_type: MediaType
+  poster_url: string | null
+  rating: number | null
+  message: string | null
+}
+
+export interface AppNotification {
+  id: string
+  user_id: string
+  type: 'share'
+  payload: NotificationSharePayload
+  read: boolean
+  created_at: string
+}
