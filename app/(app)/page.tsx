@@ -4,6 +4,7 @@ import RecentScroll from '@/components/home/RecentScroll'
 import SettingsSheet from '@/components/home/SettingsSheet'
 import DiscoverClient from '@/components/home/DiscoverClient'
 import WishlistPreview from '@/components/home/WishlistPreview'
+import CapsuleLogo from '@/components/ui/CapsuleLogo'
 import { createServerClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth'
 
@@ -74,7 +75,7 @@ export default async function HomePage() {
       <div
         className="fixed inset-0 -z-10 opacity-30"
         style={{
-          background: 'linear-gradient(135deg, #7C3AED, #4F46E5, #0F0F14, #7C3AED)',
+          background: 'linear-gradient(135deg, #8a4dff, #4d8cff, #07070d, #8a4dff)',
           backgroundSize: '400% 400%',
           animation: 'mesh-drift 12s ease infinite',
         }}
@@ -82,7 +83,7 @@ export default async function HomePage() {
 
       <div className="pb-4" style={{ paddingTop: '3.5rem' }}>
         <div className="flex items-center justify-between mb-6 px-4">
-          <img src="/logocapsuleclean.png" alt="Capsule" style={{ height: 56, width: 'auto' }} />
+          <CapsuleLogo width={110} height={50} />
           <SettingsSheet />
         </div>
 
