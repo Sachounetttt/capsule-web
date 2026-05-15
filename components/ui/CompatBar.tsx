@@ -23,14 +23,12 @@ export default function CompatBar({ score, myInitials, friendInitials, myName, f
   return (
     <div className="glass rounded-2xl p-5 flex flex-col gap-4">
       <style>{`
-        @keyframes cb-breath { 0%,100%{transform:translateY(-2px)} 50%{transform:translateY(2px)} }
         @keyframes cb-wave   { 0%,100%{transform:translateY(-2px)} 50%{transform:translateY(2px)} }
         @keyframes cb-bub {
           0%  {transform:translate(0,0) scale(.6);opacity:0}
           20% {opacity:.8}
           100%{transform:translate(0,-36px) scale(1);opacity:0}
         }
-        .cb-svg   { animation: cb-breath 6s ease-in-out infinite; }
         .cb-wave  { animation: cb-wave   5s ease-in-out infinite; transform-box:fill-box; }
         .cb-bub   { animation: cb-bub    4s ease-in infinite; transform-origin:center; }
         .cb-bub:nth-child(2){ animation-delay:-1.2s; }
