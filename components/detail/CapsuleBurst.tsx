@@ -13,7 +13,7 @@ const BLOBS = [
 
 export default function CapsuleBurst({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onComplete, 3000)
+    const t = setTimeout(onComplete, 2400)
     return () => clearTimeout(t)
   }, [onComplete])
 
@@ -33,7 +33,7 @@ export default function CapsuleBurst({ onComplete }: { onComplete: () => void })
             key={i}
             initial={{ x: 0, y: 0, scale: 0.8, opacity: 1 }}
             animate={{ x: blob.x, y: blob.y, scale: 0.1, opacity: 0 }}
-            transition={{ duration: 1.4, delay: 0.4 + i * 0.08, ease: [0.2, 0, 0.8, 1] }}
+            transition={{ duration: 1.1, delay: 0.3 + i * 0.06, ease: [0.2, 0, 0.8, 1] }}
             className="absolute rounded-full"
             style={{
               width: blob.size,
@@ -51,7 +51,7 @@ export default function CapsuleBurst({ onComplete }: { onComplete: () => void })
           height={110}
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: [0.85, 1, 1.2], opacity: [0, 1, 0] }}
-          transition={{ duration: 2.2, times: [0, 0.15, 1], ease: 'easeOut' }}
+          transition={{ duration: 1.8, times: [0, 0.18, 1], ease: 'easeOut' }}
           className="absolute"
           style={{
             filter: 'drop-shadow(0 0 30px rgba(138,77,255,0.6)) drop-shadow(0 0 60px rgba(77,140,255,0.4))',
@@ -80,7 +80,7 @@ export default function CapsuleBurst({ onComplete }: { onComplete: () => void })
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: [0, 1, 1, 0], y: [8, 0, 0, -8] }}
-        transition={{ duration: 2.6, times: [0, 0.15, 0.75, 1] }}
+        transition={{ duration: 2.1, times: [0, 0.15, 0.72, 1] }}
         className="text-lg font-semibold tracking-wide"
         style={{
           background: 'linear-gradient(135deg, #6fa8ff, #b67bff)',
