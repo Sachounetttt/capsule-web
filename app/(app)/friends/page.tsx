@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Search, UserPlus, Check, X, UserCheck } from 'lucide-react'
 import type { Friendship, UserProfile } from '@/lib/types'
+import Loader from '@/components/ui/Loader'
 
 interface SentRequest {
   id: string
@@ -12,6 +13,7 @@ interface SentRequest {
 }
 
 export default function FriendsPage() {
+  const [loading, setLoading] = useState(true)
   const [friends, setFriends] = useState<Friendship[]>([])
   const [pending, setPending] = useState<Friendship[]>([])
   const [sent, setSent] = useState<SentRequest[]>([])
@@ -29,6 +31,7 @@ export default function FriendsPage() {
         setSent(sent ?? [])
         setSentIds(new Set((sent ?? []).map((s: { addressee_id: string }) => s.addressee_id)))
       })
+      .finally(() => setLoading(false))
   }, [])
 
   useEffect(() => {
@@ -75,6 +78,14 @@ export default function FriendsPage() {
         setFriends(updated.friends ?? [])
       }
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
+        <Loader size={80} />
+      </div>
+    )
   }
 
   return (
