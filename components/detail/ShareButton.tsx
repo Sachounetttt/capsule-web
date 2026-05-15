@@ -75,13 +75,13 @@ export default function ShareButton({ mediaItemId, mediaTitle, mediaType, poster
               className="fixed inset-0 z-[60]"
               style={{ background: 'rgba(0,0,0,0.6)' }}
             />
+            <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="fixed left-4 right-4 z-[70] glass rounded-[24px] p-6"
-              style={{ top: '50%', transform: 'translateY(-50%)' }}
+              className="w-full glass rounded-[24px] p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Partager</h2>
@@ -150,6 +150,7 @@ export default function ShareButton({ mediaItemId, mediaTitle, mediaType, poster
                 </>
               )}
             </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
