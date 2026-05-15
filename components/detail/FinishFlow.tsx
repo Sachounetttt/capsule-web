@@ -24,20 +24,27 @@ const CRITERIA: Record<string, { label: string; key: string }[]> = {
     { label: 'Gameplay', key: 'gameplay' },
     { label: 'Level Design', key: 'leveldesign' },
   ],
+  game_online: [
+    { label: 'Graphisme', key: 'graphisme' },
+    { label: 'Gameplay', key: 'gameplay' },
+  ],
 }
 
 interface Props {
   itemId: string
   mediaType: MediaType
+  online?: boolean
 }
 
-export default function FinishFlow({ itemId, mediaType }: Props) {
+export default function FinishFlow({ itemId, mediaType, online }: Props) {
   const router = useRouter()
   const [step, setStep] = useState<'button' | 'form' | 'celebrating'>('button')
   const [ratings, setRatings] = useState<Record<string, CriterionValue>>({})
   const [loading, setLoading] = useState(false)
 
-  const criteria = CRITERIA[mediaType] ?? []
+  const criteriaKey = mediaType === 'game' && online ? 'game_online' : mediaType
+  const criteria = CRITERIA[criteriaKey] ?? []
+  const finishLabel = mediaType === 'game' && online ? "J'arrête d'y jouer" : "J'ai terminé !"
 
   async function handleConfirm() {
     setLoading(true)
@@ -60,7 +67,7 @@ export default function FinishFlow({ itemId, mediaType }: Props) {
         className="w-full py-3 rounded-[12px] font-semibold mb-4"
         style={{ background: '#7C3AED', color: 'white' }}
       >
-        J'ai terminé !
+        {finishLabel}
       </button>
     )
   }

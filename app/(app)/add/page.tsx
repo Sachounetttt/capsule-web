@@ -23,6 +23,7 @@ function AddPageInner() {
   const [searching, setSearching] = useState(false)
   const [selected, setSelected] = useState<SearchResult | null>(null)
   const [typeFromUrl, setTypeFromUrl] = useState(false)
+  const [isOnline, setIsOnline] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Lire les query params après le mount pour éviter la divergence server/client
@@ -58,7 +59,7 @@ function AddPageInner() {
   }, [query, mediaType])
 
   async function handleSubmit(formData: Omit<MediaItem, 'id' | 'date_added'>) {
-    const payload = { ...formData, type: mediaType, wishlist: destination === 'wishlist' }
+    const payload = { ...formData, type: mediaType, wishlist: destination === 'wishlist', online: mediaType === 'game' ? isOnline : false }
 
     if (selected?.poster_url) {
       try {
@@ -142,6 +143,25 @@ function AddPageInner() {
               </button>
             ))}
           </div>
+        )}
+
+        {/* Toggle jeu en ligne */}
+        {mediaType === 'game' && (
+          <button
+            onClick={() => setIsOnline(o => !o)}
+            className="flex items-center gap-3 w-full glass rounded-[12px] px-4 py-3 mb-4 text-sm font-medium"
+            style={{ border: `1px solid ${isOnline ? 'var(--color-purple)' : 'rgba(255,255,255,0.1)'}` }}
+          >
+            <div
+              className="rounded-full flex-shrink-0 transition-colors"
+              style={{
+                width: 20, height: 20,
+                background: isOnline ? 'var(--color-purple)' : 'rgba(255,255,255,0.1)',
+                border: `2px solid ${isOnline ? 'var(--color-purple)' : 'rgba(255,255,255,0.2)'}`,
+              }}
+            />
+            Jeu en ligne / sans fin
+          </button>
         )}
 
         {/* Search */}

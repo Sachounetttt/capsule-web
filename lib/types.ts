@@ -24,6 +24,7 @@ export interface MediaItem {
   community_rating_source?: string
   ratings_json?: Record<string, CriterionValue>
   wishlist?: boolean
+  online?: boolean
 }
 
 export interface SearchResult {

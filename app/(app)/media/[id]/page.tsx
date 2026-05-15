@@ -187,7 +187,7 @@ export default async function MediaDetailPage({
 
         {/* Finish flow */}
         {item.status === 'inProgress' && (
-          <FinishFlow itemId={item.id} mediaType={item.type as MediaType} />
+          <FinishFlow itemId={item.id} mediaType={item.type as MediaType} online={!!item.online} />
         )}
 
         {/* Share */}
