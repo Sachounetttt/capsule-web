@@ -25,6 +25,7 @@ body {
   background: radial-gradient(120% 80% at 50% 50%, #14102a 0%, #0a0816 45%, #050510 100%);
   background-attachment: fixed;
   color: #e9e4ff;
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
 }
 
 /* film grain — micro-texture subtile comme dans le logo */
