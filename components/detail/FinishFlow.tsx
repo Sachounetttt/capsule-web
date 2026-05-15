@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CriteriaRating from '@/components/ui/CriteriaRating'
+import CapsuleBurst from '@/components/detail/CapsuleBurst'
 import type { MediaType, CriterionValue } from '@/lib/types'
 
 const CRITERIA: Record<string, { label: string; key: string }[]> = {
@@ -32,7 +33,7 @@ interface Props {
 
 export default function FinishFlow({ itemId, mediaType }: Props) {
   const router = useRouter()
-  const [step, setStep] = useState<'button' | 'form'>('button')
+  const [step, setStep] = useState<'button' | 'form' | 'celebrating'>('button')
   const [ratings, setRatings] = useState<Record<string, CriterionValue>>({})
   const [loading, setLoading] = useState(false)
 
@@ -45,7 +46,11 @@ export default function FinishFlow({ itemId, mediaType }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'completed', ratings_json: ratings }),
     })
-    router.push('/library')
+    setStep('celebrating')
+  }
+
+  if (step === 'celebrating') {
+    return <CapsuleBurst onComplete={() => router.push('/library')} />
   }
 
   if (step === 'button') {
