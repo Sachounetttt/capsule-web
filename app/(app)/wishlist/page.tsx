@@ -34,7 +34,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="px-4 pb-4" style={{ paddingTop: '3.5rem' }}>
+    <div className="px-4 pb-28" style={{ paddingTop: '3.5rem' }}>
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/"

@@ -52,7 +52,7 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="px-4 pb-4" style={{ paddingTop: '3.5rem' }}>
+    <div className="px-4 pb-28" style={{ paddingTop: '3.5rem' }}>
       <h1 className="text-3xl font-bold tracking-tight mb-4">Bibliothèque</h1>
 
       <div className="glass rounded-[12px] flex items-center gap-2 px-3 py-2 mb-3">

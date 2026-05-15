@@ -1,0 +1,127 @@
+<h2>Comment afficher le sélecteur de type ?</h2>
+<p class="subtitle">Quand on clique sur le bouton +, comment choisir film / série / livre / jeu ?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f0f0f;border-radius:16px;padding:16px;font-family:sans-serif;position:relative;min-height:200px;overflow:hidden;">
+        <!-- Screen content -->
+        <div style="color:rgba(255,255,255,0.3);font-size:11px;text-align:center;padding-top:40px;">Accueil</div>
+        <!-- Bottom nav -->
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,0.05);border-top:1px solid rgba(255,255,255,0.1);padding:8px 0;">
+          <div style="display:flex;justify-content:space-around;align-items:center;">
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;text-align:center;">🏠</div>
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;text-align:center;">📚</div>
+            <div style="width:36px;height:36px;background:#7C3AED;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;">+</div>
+          </div>
+        </div>
+        <!-- Bottom sheet overlay -->
+        <div style="position:absolute;bottom:52px;left:0;right:0;background:rgba(20,20,30,0.98);border-radius:20px 20px 0 0;padding:16px 12px;border-top:1px solid rgba(255,255,255,0.1);">
+          <div style="width:32px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 16px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:14px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">🎬</div>
+              <div style="color:white;font-size:12px;margin-top:4px;">Film</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">📺</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:4px;">Série</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">📖</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:4px;">Livre</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">🎮</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:4px;">Jeu</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Bottom Sheet</h3>
+      <p>Un panneau glisse depuis le bas avec 4 grandes tuiles. Même style que le QuickAddSheet existant. Naturel sur mobile.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f0f0f;border-radius:16px;padding:16px;font-family:sans-serif;position:relative;min-height:200px;overflow:hidden;">
+        <div style="color:rgba(255,255,255,0.3);font-size:11px;text-align:center;padding-top:40px;">Accueil</div>
+        <!-- Bottom nav -->
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,0.05);border-top:1px solid rgba(255,255,255,0.1);padding:8px 0;">
+          <div style="display:flex;justify-content:space-around;align-items:center;">
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;text-align:center;">🏠</div>
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;text-align:center;">📚</div>
+            <!-- Speed dial -->
+            <div style="position:relative;">
+              <div style="width:36px;height:36px;background:#7C3AED;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;">✕</div>
+              <!-- Radial buttons -->
+              <div style="position:absolute;bottom:44px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;">
+                <div style="background:rgba(20,20,30,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:6px 14px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                  <span style="font-size:14px;">🎮</span><span style="color:white;font-size:11px;">Jeu</span>
+                </div>
+                <div style="background:rgba(20,20,30,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:6px 14px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                  <span style="font-size:14px;">📖</span><span style="color:white;font-size:11px;">Livre</span>
+                </div>
+                <div style="background:rgba(20,20,30,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:6px 14px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                  <span style="font-size:14px;">📺</span><span style="color:white;font-size:11px;">Série</span>
+                </div>
+                <div style="background:rgba(124,58,237,0.3);border:1px solid rgba(124,58,237,0.5);border-radius:24px;padding:6px 14px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                  <span style="font-size:14px;">🎬</span><span style="color:white;font-size:11px;">Film</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Speed dial vertical</h3>
+      <p>Le + se transforme en ✕ et 4 pills remontent au-dessus. Compact, sans changer de zone.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f0f0f;border-radius:16px;padding:16px;font-family:sans-serif;position:relative;min-height:200px;overflow:hidden;">
+        <div style="color:rgba(255,255,255,0.3);font-size:11px;text-align:center;padding-top:40px;">Accueil</div>
+        <!-- Dim overlay -->
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);"></div>
+        <!-- Centered modal -->
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(20,20,30,0.98);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:16px;width:80%;">
+          <div style="color:rgba(255,255,255,0.5);font-size:10px;text-align:center;margin-bottom:12px;letter-spacing:1px;">AJOUTER</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:16px;">🎬</span><span style="color:white;font-size:12px;">Film</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:16px;">📺</span><span style="color:rgba(255,255,255,0.8);font-size:12px;">Série</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:16px;">📖</span><span style="color:rgba(255,255,255,0.8);font-size:12px;">Livre</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:16px;">🎮</span><span style="color:rgba(255,255,255,0.8);font-size:12px;">Jeu vidéo</span>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom nav -->
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,0.05);border-top:1px solid rgba(255,255,255,0.1);padding:8px 0;">
+          <div style="display:flex;justify-content:space-around;align-items:center;">
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;">🏠</div>
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;">📚</div>
+            <div style="width:36px;height:36px;background:#7C3AED;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;">✕</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Modal centré</h3>
+      <p>Un dialog s'ouvre au centre avec fond sombre. Plus formel, bien lisible.</p>
+    </div>
+  </div>
+
+</div>

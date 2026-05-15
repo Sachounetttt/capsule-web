@@ -36,7 +36,7 @@ export default function DiscoverPage() {
 
   return (
     <>
-      <div className="pb-4" style={{ paddingTop: '3.5rem' }}>
+      <div className="pb-28" style={{ paddingTop: '3.5rem' }}>
         <h1 className="text-3xl font-bold tracking-tight mb-6 px-4">Découvrir</h1>
         <DiscoverSection
           title="Tendances Films"

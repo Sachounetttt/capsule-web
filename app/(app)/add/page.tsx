@@ -94,7 +94,7 @@ function AddPageInner() {
       className="fixed inset-0 overflow-y-auto"
       style={{ background: 'var(--color-bg)', zIndex: 50 }}
     >
-      <div className="px-4 pb-8" style={{ paddingTop: '3.5rem' }}>
+      <div className="px-4 pb-28" style={{ paddingTop: '3.5rem' }}>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Ajouter</h1>
           <button

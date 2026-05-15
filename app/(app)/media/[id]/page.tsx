@@ -93,7 +93,7 @@ export default async function MediaDetailPage({
       </div>
 
       {/* Content */}
-      <div className="px-4 relative z-10" style={{ marginTop: '-2rem' }}>
+      <div className="px-4 relative z-10 pb-28" style={{ marginTop: '-2rem' }}>
         {/* Title + meta */}
         <div className="mb-4">
           <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>

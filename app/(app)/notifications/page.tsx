@@ -52,7 +52,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="px-4 pt-16 pb-8 flex flex-col gap-3 max-w-lg mx-auto">
+    <div className="px-4 pt-16 pb-28 flex flex-col gap-3 max-w-lg mx-auto">
       <div className="flex items-center gap-3 pt-2 mb-2">
         <Link
           href="/"

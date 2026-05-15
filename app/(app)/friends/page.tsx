@@ -89,7 +89,7 @@ export default function FriendsPage() {
   }
 
   return (
-    <div className="px-4 pt-16 pb-8 flex flex-col gap-6 max-w-lg mx-auto">
+    <div className="px-4 pt-16 pb-28 flex flex-col gap-6 max-w-lg mx-auto">
       <h1 className="text-2xl font-bold pt-2">Amis</h1>
 
       {/* Search */}

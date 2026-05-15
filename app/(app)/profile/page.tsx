@@ -93,7 +93,7 @@ export default function ProfilePage() {
   const avatar = user.user_metadata?.avatar_url
 
   return (
-    <div className="px-4 pt-16 pb-8 flex flex-col gap-6 max-w-lg mx-auto">
+    <div className="px-4 pt-16 pb-28 flex flex-col gap-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex flex-col items-center gap-3 pt-4">
         {avatar

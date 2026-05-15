@@ -79,7 +79,7 @@ export default async function HomePage() {
         }}
       />
 
-      <div className="pb-4" style={{ paddingTop: '3.5rem' }}>
+      <div className="pb-28" style={{ paddingTop: '3.5rem' }}>
         <div className="flex items-center justify-between mb-6 px-4">
           <CapsuleLogo width={110} height={50} />
           <SettingsSheet />
