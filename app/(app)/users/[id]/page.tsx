@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import type { FriendProfileSummary } from '@/lib/types'
+import CompatBar from '@/components/ui/CompatBar'
 
 export default function UserProfilePage() {
   const { id } = useParams<{ id: string }>()
@@ -34,7 +35,10 @@ export default function UserProfilePage() {
     )
   }
 
-  const { profile, stats, recent, favorites } = data
+  const { profile, stats, recent, favorites, comparison } = data
+  const myInitials = 'Moi'
+  const friendInitials = profile.display_name.slice(0, 2).toUpperCase()
+  const friendFirstName = profile.display_name.split(' ')[0]
 
   return (
     <div className="px-4 pt-16 pb-8 flex flex-col gap-6 max-w-lg mx-auto">
@@ -108,35 +112,24 @@ export default function UserProfilePage() {
       )}
 
       {/* Taste comparison */}
-      {data.comparison && (
+      {comparison && (
         <div className="flex flex-col gap-4">
-          {/* Score */}
-          <div className="glass rounded-2xl p-5 flex flex-col items-center gap-1">
-            <span
-              className="text-5xl font-bold"
-              style={{
-                color: data.comparison.score >= 65
-                  ? '#4ADE80'
-                  : data.comparison.score >= 35
-                  ? '#FACC15'
-                  : '#F87171'
-              }}
-            >
-              {data.comparison.score}%
-            </span>
-            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              de goûts similaires
-            </span>
-          </div>
+          <CompatBar
+            score={comparison.score}
+            myInitials="Moi"
+            friendInitials={friendInitials}
+            myName="Vous"
+            friendName={friendFirstName}
+          />
 
           {/* Common */}
-          {data.comparison.common.length > 0 && (
+          {comparison.common.length > 0 && (
             <div className="flex flex-col gap-3">
               <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 En commun · {data.comparison.common.length}
               </p>
               <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {data.comparison.common.map(item => (
+                {comparison.common.map(item => (
                   <div key={item.id} className="flex-shrink-0" style={{ width: 90 }}>
                     {item.poster_url
                       ? <img src={item.poster_url} className="rounded-xl object-cover" style={{ width: 90, height: 130 }} alt={item.title} />
@@ -150,13 +143,13 @@ export default function UserProfilePage() {
           )}
 
           {/* To discover */}
-          {data.comparison.toDiscover.length > 0 && (
+          {comparison.toDiscover.length > 0 && (
             <div className="flex flex-col gap-3">
               <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                À découvrir chez {profile.display_name.split(' ')[0]}
+                À découvrir chez {friendFirstName}
               </p>
               <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {data.comparison.toDiscover.map(item => (
+                {comparison.toDiscover.map(item => (
                   <div key={item.id} className="flex-shrink-0" style={{ width: 90 }}>
                     {item.poster_url
                       ? <img src={item.poster_url} className="rounded-xl object-cover" style={{ width: 90, height: 130 }} alt={item.title} />
