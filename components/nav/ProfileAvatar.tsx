@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase/browser'
 
 export default function ProfileAvatar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [pendingCount, setPendingCount] = useState(0)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     const supabase = createClient()
@@ -15,13 +17,21 @@ export default function ProfileAvatar() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const meta = user.user_metadata
-      setAvatarUrl(meta?.avatar_url ?? null)
+      setAvatarUrl(user.user_metadata?.avatar_url ?? null)
 
-      const res = await fetch('/api/friends')
-      if (res.ok) {
-        const json = await res.json()
+      const [friendsRes, notifsRes] = await Promise.all([
+        fetch('/api/friends'),
+        fetch('/api/notifications'),
+      ])
+
+      if (friendsRes.ok) {
+        const json = await friendsRes.json()
         setPendingCount(json.pending?.length ?? 0)
+      }
+
+      if (notifsRes.ok) {
+        const json = await notifsRes.json()
+        setUnreadCount(json.unread_count ?? 0)
       }
     }
 
@@ -29,34 +39,48 @@ export default function ProfileAvatar() {
   }, [])
 
   return (
-    <Link
-      href="/profile"
-      className="fixed top-4 right-4 z-30"
-      style={{ width: 36, height: 36 }}
-    >
-      <div className="relative">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt="Profil"
-            className="rounded-full object-cover"
-            style={{ width: 36, height: 36 }}
-          />
-        ) : (
-          <div
-            className="rounded-full"
-            style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }}
-          />
-        )}
-        {pendingCount > 0 && (
+    <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
+      <Link
+        href="/notifications"
+        className="relative flex items-center justify-center"
+        style={{ width: 36, height: 36 }}
+      >
+        <Bell size={20} style={{ color: 'rgba(255,255,255,0.7)' }} />
+        {unreadCount > 0 && (
           <span
             className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-white font-bold"
             style={{ width: 16, height: 16, fontSize: 10, background: '#EF4444' }}
           >
-            {pendingCount}
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
-      </div>
-    </Link>
+      </Link>
+
+      <Link href="/profile" style={{ width: 36, height: 36 }}>
+        <div className="relative">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Profil"
+              className="rounded-full object-cover"
+              style={{ width: 36, height: 36 }}
+            />
+          ) : (
+            <div
+              className="rounded-full"
+              style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)' }}
+            />
+          )}
+          {pendingCount > 0 && (
+            <span
+              className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-white font-bold"
+              style={{ width: 16, height: 16, fontSize: 10, background: '#EF4444' }}
+            >
+              {pendingCount}
+            </span>
+          )}
+        </div>
+      </Link>
+    </div>
   )
 }
