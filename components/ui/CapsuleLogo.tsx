@@ -2,15 +2,7 @@ export default function CapsuleLogo({ width = 220, height = 100 }: { width?: num
   return (
     <div style={{ position: 'relative', width, height }}>
       <style>{`
-        @keyframes capsule-float {
-          0%,100% { transform: translateY(-6px) rotate(-.6deg) scale(1.00); }
-          50%      { transform: translateY( 6px) rotate( .6deg) scale(1.025); }
-        }
-        @keyframes capsule-halo {
-          0%,100% { transform: scale(.92); opacity: .85; }
-          50%      { transform: scale(1.06); opacity: 1; }
-        }
-        @keyframes cap-b1 {
+@keyframes cap-b1 {
           0%   { cx: 150; cy: 110; } 25%  { cx: 200; cy:  80; }
           50%  { cx: 260; cy: 120; } 75%  { cx: 180; cy: 130; } 100% { cx: 150; cy: 110; }
         }
@@ -31,8 +23,7 @@ export default function CapsuleLogo({ width = 220, height = 100 }: { width?: num
           0%,100% { transform: translateY(-2px); }
           50%     { transform: translateY( 4px); }
         }
-        .cap-float { animation: capsule-float 6s ease-in-out infinite; }
-        .cap-liq { transform-box: fill-box; transform-origin: center; }
+.cap-liq { transform-box: fill-box; transform-origin: center; }
         .cap-b1 { animation: cap-b1 7.0s ease-in-out infinite; }
         .cap-b2 { animation: cap-b2 8.4s ease-in-out infinite; }
         .cap-b3 { animation: cap-b3 6.2s ease-in-out infinite; }
@@ -42,7 +33,6 @@ export default function CapsuleLogo({ width = 220, height = 100 }: { width?: num
       `}</style>
 
       <div
-        className="cap-float"
         style={{
           width, height,
           filter: 'drop-shadow(0 9px 25px rgba(105,70,255,.45)) drop-shadow(0 2px 7px rgba(77,140,255,.35))',

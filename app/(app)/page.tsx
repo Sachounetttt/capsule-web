@@ -73,11 +73,9 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen">
       <div
-        className="fixed inset-0 -z-10 opacity-30"
+        className="fixed inset-0 -z-10"
         style={{
-          background: 'linear-gradient(135deg, #8a4dff, #4d8cff, #07070d, #8a4dff)',
-          backgroundSize: '400% 400%',
-          animation: 'mesh-drift 12s ease infinite',
+          background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(138,77,255,0.18) 0%, transparent 70%)',
         }}
       />
 
