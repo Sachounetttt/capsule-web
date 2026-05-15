@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Wifi } from 'lucide-react'
 
 export default function OnlineToggle({ itemId, defaultValue }: { itemId: string; defaultValue: boolean }) {
   const [online, setOnline] = useState(defaultValue)
   const [saving, setSaving] = useState(false)
+  const router = useRouter()
 
   async function toggle() {
     setSaving(true)
@@ -17,6 +19,7 @@ export default function OnlineToggle({ itemId, defaultValue }: { itemId: string;
     })
     setOnline(next)
     setSaving(false)
+    router.refresh()
   }
 
   return (
