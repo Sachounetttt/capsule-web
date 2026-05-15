@@ -72,7 +72,7 @@ export default function ShareButton({ mediaItemId, mediaTitle, mediaType, poster
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-[60]"
               style={{ background: 'rgba(0,0,0,0.6)' }}
             />
             <motion.div
@@ -80,7 +80,7 @@ export default function ShareButton({ mediaItemId, mediaTitle, mediaType, poster
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed bottom-0 left-0 right-0 z-50 glass rounded-t-[24px] p-6"
+              className="fixed bottom-0 left-0 right-0 z-[70] glass rounded-t-[24px] p-6"
               style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}
             >
               <div className="flex items-center justify-between mb-4">
