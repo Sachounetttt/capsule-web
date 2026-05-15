@@ -76,12 +76,12 @@ export default function ShareButton({ mediaItemId, mediaTitle, mediaType, poster
               style={{ background: 'rgba(0,0,0,0.6)' }}
             />
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed bottom-0 left-0 right-0 z-[70] glass rounded-t-[24px] p-6"
-              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="fixed left-4 right-4 z-[70] glass rounded-[24px] p-6"
+              style={{ top: '50%', transform: 'translateY(-50%)' }}
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Partager</h2>
