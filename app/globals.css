@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0F0F14;
-  --color-surface: #1A1A26;
-  --color-card: #16161F;
-  --color-purple: #7C3AED;
-  --color-indigo: #4F46E5;
+  --color-bg: #07070d;
+  --color-surface: #0e0b1c;
+  --color-card: #1c1736;
+  --color-purple: #8a4dff;
+  --color-blue: #4d8cff;
+  --color-indigo: #6a6dff;
   --color-completed: #4ADE80;
-  --color-progress: #A78BFA;
+  --color-progress: #b67bff;
   --color-dropped: #F87171;
   --color-abandoned: #6B7280;
 
@@ -19,12 +20,30 @@
 }
 
 * { box-sizing: border-box; }
-body { background: var(--color-bg); color: white; }
+
+body {
+  background: radial-gradient(120% 80% at 50% 50%, #14102a 0%, #0a0816 45%, #050510 100%);
+  background-attachment: fixed;
+  color: #e9e4ff;
+}
+
+/* film grain — micro-texture subtile comme dans le logo */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+  opacity: .35;
+  z-index: 0;
+}
 
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(138, 77, 255, 0.06);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(138, 77, 255, 0.15);
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
