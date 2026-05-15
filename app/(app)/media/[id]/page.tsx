@@ -8,6 +8,7 @@ import AmbientGlow from '@/components/detail/AmbientGlow'
 import StatusBadge from '@/components/ui/StatusBadge'
 import StarRating from '@/components/ui/StarRating'
 import DeleteButton from '@/components/detail/DeleteButton'
+import ShareButton from '@/components/detail/ShareButton'
 import FinishFlow from '@/components/detail/FinishFlow'
 import type { MediaStatus, CriterionValue, MediaType } from '@/lib/types'
 
@@ -57,6 +58,14 @@ export default async function MediaDetailPage({
         ([, v]) => v.rating > 0 || (v.review && v.review.trim().length > 0)
       )
     : []
+
+  let avgRating: number | undefined
+  if (ratingsJson) {
+    const vals = Object.values(ratingsJson).map(v => v.rating).filter(r => r > 0)
+    if (vals.length > 0) avgRating = vals.reduce((a, b) => a + b, 0) / vals.length
+  } else if (item.rating) {
+    avgRating = item.rating
+  }
 
   return (
     <div className="min-h-screen">
@@ -180,6 +189,15 @@ export default async function MediaDetailPage({
         {item.status === 'inProgress' && (
           <FinishFlow itemId={item.id} mediaType={item.type as MediaType} />
         )}
+
+        {/* Share */}
+        <ShareButton
+          mediaItemId={item.id}
+          mediaTitle={item.title}
+          mediaType={item.type}
+          posterUrl={item.poster_url}
+          rating={avgRating}
+        />
 
         {/* Delete */}
         <DeleteButton itemId={item.id} />
