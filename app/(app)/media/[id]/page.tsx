@@ -9,6 +9,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import StarRating from '@/components/ui/StarRating'
 import DeleteButton from '@/components/detail/DeleteButton'
 import ShareButton from '@/components/detail/ShareButton'
+import OnlineToggle from '@/components/detail/OnlineToggle'
 import FinishFlow from '@/components/detail/FinishFlow'
 import type { MediaStatus, CriterionValue, MediaType } from '@/lib/types'
 
@@ -186,6 +187,10 @@ export default async function MediaDetailPage({
         </Link>
 
         {/* Finish flow */}
+        {item.type === 'game' && (
+          <OnlineToggle itemId={item.id} defaultValue={!!item.online} />
+        )}
+
         {item.status === 'inProgress' && (
           <FinishFlow itemId={item.id} mediaType={item.type as MediaType} online={!!item.online} />
         )}
