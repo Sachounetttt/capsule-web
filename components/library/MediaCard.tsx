@@ -62,7 +62,7 @@ export default function MediaCard({ item, index, onDelete }: Props) {
         <Link href={`/media/${item.id}`} style={{ flexShrink: 0 }} onClick={e => e.stopPropagation()}>
           <div
             className="rounded-[10px] overflow-hidden relative"
-            style={{ width: 64, height: 88, background: 'rgba(255,255,255,0.05)' }}
+            style={{ width: 112, height: 63, background: 'rgba(255,255,255,0.05)' }}
           >
             {item.poster_url ? (
               <Image src={item.poster_url} alt={item.title} fill className="object-cover" unoptimized />

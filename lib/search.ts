@@ -1,7 +1,8 @@
 import type { SearchResult } from './types'
 
 const TMDB_BASE = 'https://api.themoviedb.org/3'
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w500'
+const TMDB_POSTER = 'https://image.tmdb.org/t/p/w500'
+const TMDB_BACKDROP = 'https://image.tmdb.org/t/p/w780'
 
 export function buildMovieResult(raw: Record<string, unknown>): SearchResult {
   return {
@@ -9,9 +10,11 @@ export function buildMovieResult(raw: Record<string, unknown>): SearchResult {
     year: raw.release_date
       ? parseInt((raw.release_date as string).slice(0, 4))
       : undefined,
-    poster_url: raw.poster_path
-      ? `${TMDB_IMG}${raw.poster_path}`
-      : undefined,
+    poster_url: raw.backdrop_path
+      ? `${TMDB_BACKDROP}${raw.backdrop_path}`
+      : raw.poster_path
+        ? `${TMDB_POSTER}${raw.poster_path}`
+        : undefined,
     community_rating: raw.vote_average ? (raw.vote_average as number) : undefined,
     community_rating_source: raw.vote_average ? 'TMDB' : undefined,
   }
@@ -23,9 +26,11 @@ export function buildTVResult(raw: Record<string, unknown>): SearchResult {
     year: raw.first_air_date
       ? parseInt((raw.first_air_date as string).slice(0, 4))
       : undefined,
-    poster_url: raw.poster_path
-      ? `${TMDB_IMG}${raw.poster_path}`
-      : undefined,
+    poster_url: raw.backdrop_path
+      ? `${TMDB_BACKDROP}${raw.backdrop_path}`
+      : raw.poster_path
+        ? `${TMDB_POSTER}${raw.poster_path}`
+        : undefined,
     community_rating: raw.vote_average ? (raw.vote_average as number) : undefined,
     community_rating_source: raw.vote_average ? 'TMDB' : undefined,
   }
