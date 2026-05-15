@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/browser'
-import { Users, LogOut, Download } from 'lucide-react'
+import { Users, LogOut, Download, Pencil, Check, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
+  const [displayName, setDisplayName] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [editValue, setEditValue] = useState('')
+  const [saving, setSaving] = useState(false)
   const [stats, setStats] = useState({ movies: 0, tvshows: 0, games: 0 })
   const [friendCount, setFriendCount] = useState(0)
   const router = useRouter()
@@ -21,9 +25,10 @@ export default function ProfilePage() {
       if (!user) { router.replace('/login'); return }
       setUser(user)
 
-      const [mediaRes, friendsRes] = await Promise.all([
+      const [mediaRes, friendsRes, profileRes] = await Promise.all([
         fetch('/api/media?wishlist=false'),
         fetch('/api/friends'),
+        supabase.from('profiles').select('display_name').eq('id', user.id).single(),
       ])
 
       if (mediaRes.ok) {
@@ -39,10 +44,37 @@ export default function ProfilePage() {
         const { friends } = await friendsRes.json()
         setFriendCount(friends?.length ?? 0)
       }
+
+      const name = profileRes.data?.display_name
+        || user.user_metadata?.full_name
+        || user.email
+        || ''
+      setDisplayName(name)
     }
 
     load()
   }, [router])
+
+  function startEdit() {
+    setEditValue(displayName)
+    setEditing(true)
+  }
+
+  async function saveEdit() {
+    if (!editValue.trim() || editValue.trim() === displayName) {
+      setEditing(false)
+      return
+    }
+    setSaving(true)
+    const res = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ display_name: editValue.trim() }),
+    })
+    if (res.ok) setDisplayName(editValue.trim())
+    setSaving(false)
+    setEditing(false)
+  }
 
   async function handleLogout() {
     await fetch('/api/auth', { method: 'DELETE' })
@@ -59,7 +91,6 @@ export default function ProfilePage() {
   if (!user) return null
 
   const avatar = user.user_metadata?.avatar_url
-  const name = user.user_metadata?.full_name ?? user.email
 
   return (
     <div className="px-4 pt-16 pb-8 flex flex-col gap-6 max-w-lg mx-auto">
@@ -67,9 +98,39 @@ export default function ProfilePage() {
       <div className="flex flex-col items-center gap-3 pt-4">
         {avatar
           ? <img src={avatar} alt="avatar" className="rounded-full" style={{ width: 72, height: 72 }} />
-          : <div className="rounded-full" style={{ width: 72, height: 72, background: 'rgba(255,255,255,0.15)' }} />
+          : <div className="rounded-full flex items-center justify-center text-2xl font-bold"
+              style={{ width: 72, height: 72, background: 'rgba(138,77,255,0.3)', color: 'var(--color-purple)' }}>
+              {displayName[0]?.toUpperCase()}
+            </div>
         }
-        <p className="text-xl font-bold">{name}</p>
+
+        {editing ? (
+          <div className="flex items-center gap-2">
+            <input
+              value={editValue}
+              onChange={e => setEditValue(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditing(false) }}
+              autoFocus
+              maxLength={30}
+              className="glass rounded-xl px-3 py-1.5 text-lg font-bold bg-transparent outline-none text-center"
+              style={{ minWidth: 0, width: `${Math.max(editValue.length, 8)}ch` }}
+            />
+            <button onClick={saveEdit} disabled={saving}>
+              <Check size={18} style={{ color: '#4ADE80' }} />
+            </button>
+            <button onClick={() => setEditing(false)}>
+              <X size={18} style={{ color: '#F87171' }} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={startEdit}
+            className="flex items-center gap-2 group"
+          >
+            <p className="text-xl font-bold">{displayName}</p>
+            <Pencil size={14} style={{ color: 'rgba(255,255,255,0.3)' }} className="group-hover:opacity-100 opacity-0 transition-opacity" />
+          </button>
+        )}
       </div>
 
       {/* Stats */}
