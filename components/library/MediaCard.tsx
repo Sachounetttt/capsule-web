@@ -84,7 +84,7 @@ export default function MediaCard({ item, index, onDelete }: Props) {
           </p>
           <h3 className="font-semibold text-sm leading-tight mb-2 truncate">{item.title}</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            <StatusBadge status={item.status} />
+            <StatusBadge status={item.status} online={item.online} />
             {item.rating ? <StarRating value={item.rating} readonly /> : null}
           </div>
         </Link>

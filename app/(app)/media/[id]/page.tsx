@@ -106,7 +106,7 @@ export default async function MediaDetailPage({
           </p>
           <h1 className="text-2xl font-bold tracking-tight mb-3">{item.title}</h1>
           <div className="flex items-center gap-3 flex-wrap">
-            <StatusBadge status={item.status as MediaStatus} />
+            <StatusBadge status={item.status as MediaStatus} online={!!item.online} />
             {item.rating && !ratingsJson ? <StarRating value={item.rating} readonly /> : null}
             {item.community_rating != null && (
               <span

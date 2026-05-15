@@ -16,7 +16,9 @@ const colors: Record<MediaStatus, string> = {
   abandoned: '#6B7280',
 }
 
-export default function StatusBadge({ status }: { status: MediaStatus }) {
+export default function StatusBadge({ status, online }: { status: MediaStatus; online?: boolean }) {
+  const label = status === 'completed' && online ? 'Joué' : labels[status]
+
   return (
     <AnimatePresence mode="wait">
       <motion.span
@@ -32,7 +34,7 @@ export default function StatusBadge({ status }: { status: MediaStatus }) {
           border: `1px solid ${colors[status]}40`,
         }}
       >
-        {labels[status]}
+        {label}
       </motion.span>
     </AnimatePresence>
   )
