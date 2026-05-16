@@ -3,21 +3,30 @@ export default function CapsuleLogo({ width = 220, height = 100 }: { width?: num
     <div style={{ position: 'relative', width, height }}>
       <style>{`
 @keyframes cap-b1 {
-          0%   { cx: 150; cy: 110; } 25%  { cx: 200; cy:  80; }
-          50%  { cx: 260; cy: 120; } 75%  { cx: 180; cy: 130; } 100% { cx: 150; cy: 110; }
+          0%   { transform: translate(  0px,   0px); }
+          25%  { transform: translate( 50px, -30px); }
+          50%  { transform: translate(110px,  10px); }
+          75%  { transform: translate( 30px,  20px); }
+          100% { transform: translate(  0px,   0px); }
         }
         @keyframes cap-b2 {
-          0%   { cx: 290; cy:  90; } 25%  { cx: 240; cy: 120; }
-          50%  { cx: 180; cy:  85; } 75%  { cx: 270; cy: 110; } 100% { cx: 290; cy:  90; }
+          0%   { transform: translate(   0px,   0px); }
+          25%  { transform: translate( -50px,  30px); }
+          50%  { transform: translate(-110px,  -5px); }
+          75%  { transform: translate( -20px,  20px); }
+          100% { transform: translate(   0px,   0px); }
         }
         @keyframes cap-b3 {
-          0%   { cx: 220; cy: 100; } 50%  { cx: 220; cy: 105; } 100% { cx: 220; cy: 100; }
+          0%,100% { transform: translate(0px, 0px); }
+          50%     { transform: translate(0px, 5px); }
         }
         @keyframes cap-b4 {
-          0%   { cx: 110; cy:  90; } 50%  { cx: 130; cy: 120; } 100% { cx: 110; cy:  90; }
+          0%,100% { transform: translate( 0px,  0px); }
+          50%     { transform: translate(20px, 30px); }
         }
         @keyframes cap-b5 {
-          0%   { cx: 330; cy: 115; } 50%  { cx: 310; cy:  85; } 100% { cx: 330; cy: 115; }
+          0%,100% { transform: translate(  0px,   0px); }
+          50%     { transform: translate(-20px, -30px); }
         }
         @keyframes cap-slosh {
           0%,100% { transform: translateY(-2px); }
@@ -90,11 +99,11 @@ export default function CapsuleLogo({ width = 220, height = 100 }: { width?: num
           <g clipPath="url(#cap-clip)">
             <ellipse cx="220" cy="100" rx="210" ry="80" fill="url(#cap-blob-mix)" opacity=".35"/>
             <g filter="url(#cap-goo)" style={{ mixBlendMode: 'screen' }}>
-              <circle className="cap-liq cap-b1" r="60" fill="url(#cap-blob-blue)"/>
-              <circle className="cap-liq cap-b2" r="68" fill="url(#cap-blob-violet)"/>
-              <circle className="cap-liq cap-b3" r="46" fill="url(#cap-blob-mix)"/>
-              <circle className="cap-liq cap-b4" r="38" fill="url(#cap-blob-blue)"/>
-              <circle className="cap-liq cap-b5" r="34" fill="url(#cap-blob-violet)"/>
+              <circle className="cap-liq cap-b1" cx="150" cy="110" r="60" fill="url(#cap-blob-blue)"/>
+              <circle className="cap-liq cap-b2" cx="290" cy="90"  r="68" fill="url(#cap-blob-violet)"/>
+              <circle className="cap-liq cap-b3" cx="220" cy="100" r="46" fill="url(#cap-blob-mix)"/>
+              <circle className="cap-liq cap-b4" cx="110" cy="90"  r="38" fill="url(#cap-blob-blue)"/>
+              <circle className="cap-liq cap-b5" cx="330" cy="115" r="34" fill="url(#cap-blob-violet)"/>
             </g>
             <path className="cap-slosh"
               d="M 0,100 C 60,86 120,114 220,100 C 320,86 380,114 440,100 L 440,200 L 0,200 Z"
