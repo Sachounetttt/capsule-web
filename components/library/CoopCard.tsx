@@ -19,8 +19,6 @@ interface Props {
 }
 
 export default function CoopCard({ item, index }: Props) {
-  const coPlayers = item.members.filter(m => m.profile !== null)
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -43,7 +41,7 @@ export default function CoopCard({ item, index }: Props) {
             </div>
           )}
           <div className="absolute bottom-1 right-1 flex">
-            {coPlayers.slice(0, 2).map((m, i) => (
+            {item.members.slice(0, 2).map((m, i) => (
               m.profile?.avatar_url ? (
                 <Image
                   key={m.user_id}

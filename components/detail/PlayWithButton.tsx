@@ -16,31 +16,34 @@ interface Props {
 export default function PlayWithButton({ gameTitle, posterUrl, rawgId, dominantColor, friends }: Props) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   if (friends.length === 0) return null
 
   async function handleSelect(friend: UserProfile) {
     setLoading(true)
+    setError(null)
     try {
       const capsuleRes = await fetch('/api/shared-capsules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: gameTitle, poster_url: posterUrl, rawg_id: rawgId, dominant_color: dominantColor }),
       })
-      if (!capsuleRes.ok) throw new Error('Erreur création capsule')
+      if (!capsuleRes.ok) throw new Error('Erreur lors de la création')
       const capsule = await capsuleRes.json() as { id: string }
 
-      await fetch(`/api/shared-capsules/${capsule.id}/invite`, {
+      const inviteRes = await fetch(`/api/shared-capsules/${capsule.id}/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ invitee_id: friend.id }),
       })
+      if (!inviteRes.ok) throw new Error("Erreur lors de l'invitation")
 
       setOpen(false)
       router.push(`/shared/${capsule.id}`)
-    } catch {
-      // keep modal open on error
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Une erreur est survenue')
     } finally {
       setLoading(false)
     }
@@ -67,6 +70,9 @@ export default function PlayWithButton({ gameTitle, posterUrl, rawgId, dominantC
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-base font-semibold mb-4">Choisir un ami</h3>
+            {error && (
+              <p className="text-xs mb-3 px-1" style={{ color: 'rgba(248,113,113,0.9)' }}>{error}</p>
+            )}
             <div className="flex flex-col gap-3">
               {friends.map(friend => (
                 <button

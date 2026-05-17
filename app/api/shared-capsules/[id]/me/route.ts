@@ -19,9 +19,14 @@ export async function PATCH(
     personal_notes?: string
   }
 
+  const allowed: Record<string, unknown> = {}
+  if (body.status !== undefined) allowed.status = body.status
+  if (body.personal_rating !== undefined) allowed.personal_rating = body.personal_rating
+  if (body.personal_notes !== undefined) allowed.personal_notes = body.personal_notes
+
   const { data, error } = await supabase
     .from('shared_capsule_members')
-    .update(body)
+    .update(allowed)
     .eq('capsule_id', id)
     .eq('user_id', user.id)
     .select()

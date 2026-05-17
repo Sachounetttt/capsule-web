@@ -22,6 +22,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [pendingInvites, setPendingInvites] = useState<{ id: string; capsule_id: string }[]>([])
   const [loading, setLoading] = useState(true)
+  const [responding, setResponding] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.allSettled([
@@ -46,15 +47,19 @@ export default function NotificationsPage() {
     router.push(`/add?${query}`)
   }
 
-  async function respondToInvite(capsuleId: string, accepted: boolean) {
+  async function respondToInvite(notifId: string, capsuleId: string, accepted: boolean) {
+    if (responding === capsuleId) return
     const invite = pendingInvites.find(i => i.capsule_id === capsuleId)
     if (!invite) return
+    setResponding(capsuleId)
     await fetch(`/api/shared-capsules/invitations/${invite.id}/respond`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ accepted }),
     })
+    await markRead(notifId)
     setPendingInvites(prev => prev.filter(i => i.capsule_id !== capsuleId))
+    setResponding(null)
     if (accepted) router.push(`/shared/${capsuleId}`)
     else router.refresh()
   }
@@ -111,16 +116,18 @@ export default function NotificationsPage() {
                 {hasPendingInvite && (
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => respondToInvite(p.capsule_id, true)}
+                      onClick={() => respondToInvite(notif.id, p.capsule_id, true)}
+                      disabled={responding === p.capsule_id}
                       className="flex-1 py-2 rounded-[10px] text-sm font-medium"
-                      style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)' }}
+                      style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)', opacity: responding === p.capsule_id ? 0.5 : 1 }}
                     >
                       Accepter
                     </button>
                     <button
-                      onClick={() => respondToInvite(p.capsule_id, false)}
+                      onClick={() => respondToInvite(notif.id, p.capsule_id, false)}
+                      disabled={responding === p.capsule_id}
                       className="flex-1 py-2 rounded-[10px] text-sm font-medium"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', opacity: responding === p.capsule_id ? 0.5 : 1 }}
                     >
                       Refuser
                     </button>
