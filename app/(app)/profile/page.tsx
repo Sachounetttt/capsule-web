@@ -145,7 +145,7 @@ export default function ProfilePage() {
           style={{ width: 72, height: 72 }}
         >
           {avatarUrl
-            ? <img src={avatarUrl} alt="avatar" className="rounded-full w-full h-full object-cover" />
+            ? <img key={avatarUrl} src={avatarUrl} alt="avatar" className="rounded-full w-full h-full object-cover" />
             : <div className="rounded-full w-full h-full flex items-center justify-center text-2xl font-bold"
                 style={{ background: 'rgba(138,77,255,0.3)', color: 'var(--color-purple)' }}>
                 {displayName[0]?.toUpperCase()}

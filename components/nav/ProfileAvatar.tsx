@@ -66,6 +66,7 @@ export default function ProfileAvatar() {
         <div className="relative">
           {avatarUrl ? (
             <img
+              key={avatarUrl}
               src={avatarUrl}
               alt="Profil"
               className="rounded-full object-cover"
