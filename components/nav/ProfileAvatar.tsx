@@ -17,13 +17,11 @@ export default function ProfileAvatar() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id', user.id)
-        .single()
-
-      setAvatarUrl(profile?.avatar_url || user.user_metadata?.avatar_url || null)
+      const profileRes = await fetch('/api/profile')
+      if (profileRes.ok) {
+        const profile = await profileRes.json()
+        setAvatarUrl(profile.avatar_url || user.user_metadata?.avatar_url || null)
+      }
 
       const [friendsRes, notifsRes] = await Promise.all([
         fetch('/api/friends'),
