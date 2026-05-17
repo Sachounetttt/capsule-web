@@ -10,6 +10,7 @@ import StarRating from '@/components/ui/StarRating'
 import DeleteButton from '@/components/detail/DeleteButton'
 import ShareButton from '@/components/detail/ShareButton'
 import OnlineToggle from '@/components/detail/OnlineToggle'
+import PlayWithButton from '@/components/detail/PlayWithButton'
 import FinishFlow from '@/components/detail/FinishFlow'
 import type { MediaStatus, CriterionValue, MediaType } from '@/lib/types'
 
@@ -52,6 +53,27 @@ export default async function MediaDetailPage({
     .single()
 
   if (!item) notFound()
+
+  let acceptedFriends: { id: string; display_name: string; avatar_url?: string }[] = []
+  if (item.type === 'game') {
+    const { data: friendships } = await supabase
+      .from('friendships')
+      .select('requester_id, addressee_id')
+      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+      .eq('status', 'accepted')
+
+    const friendIds = (friendships ?? []).map(f =>
+      f.requester_id === user.id ? f.addressee_id : f.requester_id
+    )
+
+    if (friendIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .in('id', friendIds)
+      acceptedFriends = profiles ?? []
+    }
+  }
 
   const ratingsJson = item.ratings_json as Record<string, CriterionValue> | null
   const filledCriteria = ratingsJson
@@ -187,6 +209,15 @@ export default async function MediaDetailPage({
         </Link>
 
         {/* Finish flow */}
+        {item.type === 'game' && (
+          <PlayWithButton
+            gameTitle={item.title}
+            posterUrl={item.poster_url}
+            dominantColor={item.dominant_color}
+            friends={acceptedFriends}
+          />
+        )}
+
         {item.type === 'game' && (
           <OnlineToggle itemId={item.id} defaultValue={!!item.online} />
         )}
