@@ -32,7 +32,7 @@ export default function ProfilePage() {
       const [mediaRes, friendsRes, profileRes] = await Promise.all([
         fetch('/api/media?wishlist=false'),
         fetch('/api/friends'),
-        supabase.from('profiles').select('display_name, avatar_url').eq('id', user.id).single(),
+        fetch('/api/profile'),
       ])
 
       if (mediaRes.ok) {
@@ -49,12 +49,11 @@ export default function ProfilePage() {
         setFriendCount(friends?.length ?? 0)
       }
 
-      const name = profileRes.data?.display_name
-        || user.user_metadata?.full_name
-        || user.email
-        || ''
-      setDisplayName(name)
-      setAvatarUrl(profileRes.data?.avatar_url || user.user_metadata?.avatar_url || null)
+      if (profileRes.ok) {
+        const profile = await profileRes.json()
+        setDisplayName(profile.display_name || user.user_metadata?.full_name || user.email || '')
+        setAvatarUrl(profile.avatar_url || user.user_metadata?.avatar_url || null)
+      }
     }
 
     load()
