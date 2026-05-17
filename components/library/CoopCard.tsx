@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -31,7 +30,7 @@ export default function CoopCard({ item, index }: Props) {
           style={{ width: 112, height: 63, background: 'rgba(255,255,255,0.05)' }}
         >
           {item.poster_url ? (
-            <Image src={item.poster_url} alt={item.title} fill className="object-cover" unoptimized />
+            <img src={item.poster_url} alt={item.title} className="w-full h-full object-cover" />
           ) : (
             <div
               className="w-full h-full flex items-center justify-center text-lg font-bold"
@@ -43,14 +42,12 @@ export default function CoopCard({ item, index }: Props) {
           <div className="absolute bottom-1 right-1 flex">
             {item.members.slice(0, 2).map((m, i) => (
               m.profile?.avatar_url ? (
-                <Image
+                <img
                   key={m.user_id}
                   src={m.profile.avatar_url}
                   alt={m.profile.display_name}
-                  width={16}
-                  height={16}
                   className="rounded-full border border-black"
-                  style={{ marginLeft: i > 0 ? -4 : 0 }}
+                  style={{ width: 16, height: 16, objectFit: 'cover', marginLeft: i > 0 ? -4 : 0 }}
                 />
               ) : (
                 <div
