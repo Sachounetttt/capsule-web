@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
   const [saving, setSaving] = useState(false)
@@ -84,6 +85,7 @@ export default function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file || !user) return
     setUploadingAvatar(true)
+    setAvatarError(null)
     const supabase = createClient()
     const ext = file.name.split('.').pop() ?? 'jpg'
     const path = `${user.id}.${ext}`
@@ -91,7 +93,7 @@ export default function ProfilePage() {
       .from('avatars')
       .upload(path, file, { upsert: true })
     if (uploadError) {
-      alert(`Erreur upload : ${uploadError.message}\n\nVérifie que le bucket "avatars" existe dans Supabase Storage (public).`)
+      setAvatarError('Bucket "avatars" manquant dans Supabase Storage — crée-le en mode public.')
       setUploadingAvatar(false)
       return
     }
@@ -131,6 +133,11 @@ export default function ProfilePage() {
           className="hidden"
           onChange={handleAvatarChange}
         />
+        {avatarError && (
+          <p className="text-xs text-center px-4 mb-1" style={{ color: '#F87171' }}>
+            {avatarError}
+          </p>
+        )}
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadingAvatar}
