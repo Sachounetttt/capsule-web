@@ -87,6 +87,12 @@ export default function ProfilePage() {
     setUploadingAvatar(true)
     setAvatarError(null)
     const supabase = createClient()
+    // Delete old file from storage if it's ours
+    if (avatarUrl?.includes('/avatars/')) {
+      const oldPath = avatarUrl.split('/avatars/')[1]?.split('?')[0]
+      if (oldPath) await supabase.storage.from('avatars').remove([oldPath])
+    }
+
     const ext = file.name.split('.').pop() ?? 'jpg'
     const path = `${user.id}-${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage
