@@ -39,7 +39,16 @@
       "Bash(git fetch *)",
       "Bash(git stash *)",
       "Bash(git pull *)",
-      "Bash(git clean *)"
+      "Bash(git clean *)",
+      "Skill(superpowers:systematic-debugging)",
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:executing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Skill(superpowers:requesting-code-review)",
+      "Skill(superpowers:finishing-a-development-branch)",
+      "Bash(gh pr create --title 'feat: capsules co-op partagées' --body ' *)",
+      "Bash(where gh *)"
     ]
   }
 }
