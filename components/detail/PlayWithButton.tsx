@@ -61,12 +61,12 @@ export default function PlayWithButton({ gameTitle, posterUrl, rawgId, dominantC
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end"
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => !loading && setOpen(false)}
         >
           <div
-            className="w-full glass rounded-t-[24px] p-6"
+            className="w-full glass rounded-[24px] p-6"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-base font-semibold mb-4">Choisir un ami</h3>
