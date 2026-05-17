@@ -37,7 +37,7 @@ export async function GET() {
   }
 
   const result = (memberRows ?? []).map(r => ({
-    ...(r.shared_capsules as Record<string, unknown>),
+    ...(r.shared_capsules as unknown as Record<string, unknown>),
     my_status: r.status,
     my_rating: r.personal_rating,
     members: (membersByCapsule[r.capsule_id] ?? []).map(m => ({
