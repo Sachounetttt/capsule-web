@@ -85,19 +85,24 @@ export default function ProfilePage() {
     if (!file || !user) return
     setUploadingAvatar(true)
     const supabase = createClient()
-    const ext = file.name.split('.').pop()
+    const ext = file.name.split('.').pop() ?? 'jpg'
     const path = `${user.id}.${ext}`
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(path, file, { upsert: true })
-    if (uploadError) { setUploadingAvatar(false); return }
+    if (uploadError) {
+      alert(`Erreur upload : ${uploadError.message}\n\nVérifie que le bucket "avatars" existe dans Supabase Storage (public).`)
+      setUploadingAvatar(false)
+      return
+    }
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    const urlWithBust = `${publicUrl}?t=${Date.now()}`
     await fetch('/api/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ avatar_url: publicUrl }),
+      body: JSON.stringify({ avatar_url: urlWithBust }),
     })
-    setAvatarUrl(publicUrl)
+    setAvatarUrl(urlWithBust)
     setUploadingAvatar(false)
   }
 

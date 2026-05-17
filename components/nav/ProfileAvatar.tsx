@@ -17,7 +17,13 @@ export default function ProfileAvatar() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      setAvatarUrl(user.user_metadata?.avatar_url ?? null)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single()
+
+      setAvatarUrl(profile?.avatar_url || user.user_metadata?.avatar_url || null)
 
       const [friendsRes, notifsRes] = await Promise.all([
         fetch('/api/friends'),
