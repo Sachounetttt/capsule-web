@@ -7,6 +7,7 @@ import AmbientGlow from '@/components/detail/AmbientGlow'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SharedNotesEditor from '@/components/detail/SharedNotesEditor'
 import CoopStatusActions from '@/components/detail/CoopStatusActions'
+import CoopLeaveButton from '@/components/detail/CoopLeaveButton'
 import type { MediaStatus } from '@/lib/types'
 
 export default async function SharedCapsulePage({
@@ -140,6 +141,8 @@ export default async function SharedCapsulePage({
             </p>
           </div>
         )}
+
+        <CoopLeaveButton capsuleId={id} />
       </div>
     </div>
   )
