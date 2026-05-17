@@ -3,12 +3,22 @@ import { useState, useEffect, useMemo } from 'react'
 import { Search } from 'lucide-react'
 import FilterPills, { type Filter, type StatusFilter } from '@/components/library/FilterPills'
 import MediaCard from '@/components/library/MediaCard'
+import CoopCard from '@/components/library/CoopCard'
 import ShimmerCard from '@/components/ui/ShimmerCard'
-import type { MediaItem } from '@/lib/types'
+import type { MediaItem, MediaStatus } from '@/lib/types'
+
+interface CoopCapsuleSummary {
+  id: string
+  title: string
+  poster_url?: string
+  my_status: MediaStatus
+  members: { user_id: string; profile: { id: string; display_name: string; avatar_url?: string } | null }[]
+}
 
 export default function LibraryPage() {
   const [items, setItems] = useState<MediaItem[]>([])
   const [wishlistItems, setWishlistItems] = useState<MediaItem[]>([])
+  const [coopCapsules, setCoopCapsules] = useState<CoopCapsuleSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
@@ -19,9 +29,11 @@ export default function LibraryPage() {
     Promise.allSettled([
       fetch('/api/media').then(r => r.json()),
       fetch('/api/media?wishlist=true').then(r => r.json()),
-    ]).then(([lib, wish]) => {
+      fetch('/api/shared-capsules').then(r => r.json()),
+    ]).then(([lib, wish, coop]) => {
       if (lib.status === 'fulfilled') setItems(Array.isArray(lib.value) ? lib.value : [])
       if (wish.status === 'fulfilled') setWishlistItems(Array.isArray(wish.value) ? wish.value : [])
+      if (coop.status === 'fulfilled') setCoopCapsules(Array.isArray(coop.value) ? coop.value : [])
       setLoading(false)
     })
   }, [])
@@ -34,6 +46,12 @@ export default function LibraryPage() {
     if (query) list = list.filter(i => i.title.toLowerCase().includes(query.toLowerCase()))
     return list
   }, [items, wishlistItems, filter, statusFilter, query])
+
+  const displayedCoop = useMemo(() => {
+    if (filter === 'wishlist' || (filter !== 'all' && filter !== 'game')) return []
+    if (query) return coopCapsules.filter(c => c.title.toLowerCase().includes(query.toLowerCase()))
+    return coopCapsules
+  }, [coopCapsules, filter, query])
 
   const visible = useMemo(
     () => (showAll ? displayed : displayed.slice(0, 5)),
@@ -77,18 +95,18 @@ export default function LibraryPage() {
 
       <div className="flex flex-col gap-3">
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <ShimmerCard key={i} className="h-24" />
-            ))
-          : visible.map((item, i) => (
-              <MediaCard key={item.id} item={item} index={i} onDelete={handleDelete} />
-            ))
+          ? Array.from({ length: 4 }).map((_, i) => <ShimmerCard key={i} className="h-24" />)
+          : <>
+              {visible.map((item, i) => (
+                <MediaCard key={item.id} item={item} index={i} onDelete={handleDelete} />
+              ))}
+              {displayedCoop.map((item, i) => (
+                <CoopCard key={item.id} item={item} index={visible.length + i} />
+              ))}
+            </>
         }
-        {!loading && displayed.length === 0 && (
-          <p
-            className="text-center py-12 text-sm"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
+        {!loading && displayed.length === 0 && displayedCoop.length === 0 && (
+          <p className="text-center py-12 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
             Aucun élément
           </p>
         )}
