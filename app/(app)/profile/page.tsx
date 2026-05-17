@@ -104,11 +104,17 @@ export default function ProfilePage() {
       return
     }
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    await fetch('/api/profile', {
+    const patchRes = await fetch('/api/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ avatar_url: publicUrl }),
     })
+    if (!patchRes.ok) {
+      const err = await patchRes.json().catch(() => ({}))
+      setAvatarError(`Erreur sauvegarde profil : ${JSON.stringify(err)}`)
+      setUploadingAvatar(false)
+      return
+    }
     setAvatarUrl(publicUrl)
     setUploadingAvatar(false)
   }
