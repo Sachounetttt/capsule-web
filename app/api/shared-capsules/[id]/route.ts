@@ -71,7 +71,11 @@ export async function PATCH(
     return NextResponse.json({ error: 'Introuvable' }, { status: 404 })
   }
 
-  const { shared_notes } = await req.json() as { shared_notes: string }
+  const body = await req.json() as { shared_notes?: string }
+  if (body.shared_notes === undefined) {
+    return NextResponse.json({ error: 'shared_notes requis' }, { status: 400 })
+  }
+  const { shared_notes } = body
 
   const { data, error } = await supabase
     .from('shared_capsules')
