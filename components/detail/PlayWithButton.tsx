@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { Users } from 'lucide-react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import type { UserProfile } from '@/lib/types'
 
@@ -83,12 +82,11 @@ export default function PlayWithButton({ gameTitle, posterUrl, rawgId, dominantC
                   style={{ background: 'rgba(255,255,255,0.06)' }}
                 >
                   {friend.avatar_url ? (
-                    <Image
+                    <img
                       src={friend.avatar_url}
                       alt={friend.display_name}
-                      width={36}
-                      height={36}
                       className="rounded-full"
+                      style={{ width: 36, height: 36, objectFit: 'cover' }}
                     />
                   ) : (
                     <div
