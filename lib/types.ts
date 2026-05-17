@@ -87,8 +87,59 @@ export interface NotificationSharePayload {
 export interface AppNotification {
   id: string
   user_id: string
-  type: 'share'
-  payload: NotificationSharePayload
+  type: 'share' | 'coop_invite' | 'coop_accepted'
+  payload: NotificationSharePayload | CoopInvitePayload | CoopAcceptedPayload
   read: boolean
   created_at: string
+}
+
+export interface SharedCapsule {
+  id: string
+  title: string
+  poster_url?: string
+  rawg_id?: string
+  dominant_color?: string
+  shared_notes: string
+  created_by: string
+  created_at: string
+  members?: SharedCapsuleMember[]
+}
+
+export interface SharedCapsuleMember {
+  id: string
+  capsule_id: string
+  user_id: string
+  status: MediaStatus
+  personal_rating?: number
+  personal_notes: string
+  joined_at: string
+  profile?: UserProfile
+}
+
+export type CapsuleInvitationStatus = 'pending' | 'accepted' | 'declined'
+
+export interface SharedCapsuleInvitation {
+  id: string
+  capsule_id: string
+  inviter_id: string
+  invitee_id: string
+  status: CapsuleInvitationStatus
+  created_at: string
+  capsule?: Pick<SharedCapsule, 'id' | 'title' | 'poster_url' | 'dominant_color'>
+  inviter?: UserProfile
+}
+
+export interface CoopInvitePayload {
+  inviter_id: string
+  inviter_name: string
+  capsule_id: string
+  capsule_title: string
+  poster_url: string | null
+}
+
+export interface CoopAcceptedPayload {
+  accepter_id: string
+  accepter_name: string
+  capsule_id: string
+  capsule_title: string
 }
