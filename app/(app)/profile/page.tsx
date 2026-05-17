@@ -1,20 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/browser'
-import { Users, LogOut, Download, Pencil, Check, X } from 'lucide-react'
+import { Users, LogOut, Download, Pencil, Check, X, Camera } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
   const [displayName, setDisplayName] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
   const [saving, setSaving] = useState(false)
   const [stats, setStats] = useState({ movies: 0, tvshows: 0, games: 0 })
   const [friendCount, setFriendCount] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -28,7 +31,7 @@ export default function ProfilePage() {
       const [mediaRes, friendsRes, profileRes] = await Promise.all([
         fetch('/api/media?wishlist=false'),
         fetch('/api/friends'),
-        supabase.from('profiles').select('display_name').eq('id', user.id).single(),
+        supabase.from('profiles').select('display_name, avatar_url').eq('id', user.id).single(),
       ])
 
       if (mediaRes.ok) {
@@ -50,6 +53,7 @@ export default function ProfilePage() {
         || user.email
         || ''
       setDisplayName(name)
+      setAvatarUrl(profileRes.data?.avatar_url || user.user_metadata?.avatar_url || null)
     }
 
     load()
@@ -76,6 +80,27 @@ export default function ProfilePage() {
     setEditing(false)
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setUploadingAvatar(true)
+    const supabase = createClient()
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true })
+    if (uploadError) { setUploadingAvatar(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ avatar_url: publicUrl }),
+    })
+    setAvatarUrl(publicUrl)
+    setUploadingAvatar(false)
+  }
+
   async function handleLogout() {
     await fetch('/api/auth', { method: 'DELETE' })
     router.replace('/login')
@@ -90,19 +115,40 @@ export default function ProfilePage() {
 
   if (!user) return null
 
-  const avatar = user.user_metadata?.avatar_url
-
   return (
     <div className="px-4 pt-16 pb-28 flex flex-col gap-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex flex-col items-center gap-3 pt-4">
-        {avatar
-          ? <img src={avatar} alt="avatar" className="rounded-full" style={{ width: 72, height: 72 }} />
-          : <div className="rounded-full flex items-center justify-center text-2xl font-bold"
-              style={{ width: 72, height: 72, background: 'rgba(138,77,255,0.3)', color: 'var(--color-purple)' }}>
-              {displayName[0]?.toUpperCase()}
-            </div>
-        }
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarChange}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingAvatar}
+          className="relative rounded-full"
+          style={{ width: 72, height: 72 }}
+        >
+          {avatarUrl
+            ? <img src={avatarUrl} alt="avatar" className="rounded-full w-full h-full object-cover" />
+            : <div className="rounded-full w-full h-full flex items-center justify-center text-2xl font-bold"
+                style={{ background: 'rgba(138,77,255,0.3)', color: 'var(--color-purple)' }}>
+                {displayName[0]?.toUpperCase()}
+              </div>
+          }
+          <div
+            className="absolute bottom-0 right-0 rounded-full flex items-center justify-center"
+            style={{ width: 22, height: 22, background: 'rgba(138,77,255,0.9)' }}
+          >
+            {uploadingAvatar
+              ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              : <Camera size={12} color="white" />
+            }
+          </div>
+        </button>
 
         {editing ? (
           <div className="flex items-center gap-2">
