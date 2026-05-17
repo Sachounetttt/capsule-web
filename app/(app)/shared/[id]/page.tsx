@@ -1,12 +1,12 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth'
 import AmbientGlow from '@/components/detail/AmbientGlow'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SharedNotesEditor from '@/components/detail/SharedNotesEditor'
+import CoopStatusActions from '@/components/detail/CoopStatusActions'
 import type { MediaStatus } from '@/lib/types'
 
 export default async function SharedCapsulePage({
@@ -67,12 +67,10 @@ export default async function SharedCapsulePage({
         <AmbientGlow color={capsule.dominant_color} />
         <div className="relative" style={{ height: 200 }}>
           {capsule.poster_url ? (
-            <Image
+            <img
               src={capsule.poster_url}
               alt={capsule.title}
-              fill
-              className="object-cover"
-              unoptimized
+              className="w-full h-full object-cover"
             />
           ) : (
             <div
@@ -103,12 +101,11 @@ export default async function SharedCapsulePage({
             {enrichedMembers.map(m => (
               <div key={m.user_id} className="flex items-center gap-3">
                 {m.profile?.avatar_url ? (
-                  <Image
+                  <img
                     src={m.profile.avatar_url}
                     alt={m.profile.display_name}
-                    width={32}
-                    height={32}
                     className="rounded-full"
+                    style={{ width: 32, height: 32, objectFit: 'cover' }}
                   />
                 ) : (
                   <div
@@ -128,6 +125,8 @@ export default async function SharedCapsulePage({
             ))}
           </div>
         </div>
+
+        <CoopStatusActions capsuleId={id} currentStatus={myMembership.status as MediaStatus} />
 
         <SharedNotesEditor capsuleId={id} initialNotes={capsule.shared_notes} />
 
