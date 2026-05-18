@@ -75,6 +75,7 @@ export interface FriendProfileSummary {
   recent: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url' | 'date_added'>[]
   favorites: Pick<MediaItem, 'id' | 'title' | 'type' | 'year' | 'poster_url'>[]
   comparison: Comparison
+  totalHours: number
 }
 
 export interface NotificationSharePayload {

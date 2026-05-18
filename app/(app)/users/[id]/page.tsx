@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Clock } from 'lucide-react'
 import type { FriendProfileSummary } from '@/lib/types'
 import CompatBar from '@/components/ui/CompatBar'
 
@@ -70,7 +70,7 @@ export default function UserProfilePage() {
     )
   }
 
-  const { profile, stats, recent, favorites, comparison } = data
+  const { profile, stats, recent, favorites, comparison, totalHours } = data
   const myInitials = 'Moi'
   const friendInitials = profile.display_name.slice(0, 2).toUpperCase()
   const friendFirstName = profile.display_name.split(' ')[0]
@@ -105,6 +105,17 @@ export default function UserProfilePage() {
           </div>
         ))}
       </div>
+
+      {/* Temps passé */}
+      {totalHours > 0 && (
+        <div className="glass rounded-[20px] p-4 flex items-center gap-3">
+          <Clock size={18} style={{ color: 'var(--color-purple)' }} />
+          <div>
+            <p className="text-lg font-bold">~{totalHours}h</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>passées sur ses médias</p>
+          </div>
+        </div>
+      )}
 
       {/* Recent */}
       {recent.length > 0 && (

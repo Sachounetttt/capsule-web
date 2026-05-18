@@ -80,7 +80,7 @@ export async function GET(
 
   const { data: items } = await supabase
     .from('media_items')
-    .select('id, type, title, year, poster_url, date_added, rating, status')
+    .select('id, type, title, year, poster_url, date_added, rating, status, runtime_minutes')
     .eq('user_id', id)
     .eq('wishlist', false)
 
@@ -106,7 +106,16 @@ export async function GET(
 
   const favorites = all.filter(i => i.rating === 5).slice(0, 6)
 
+  const totalMinutes = all.reduce((sum, i) => {
+    if (i.runtime_minutes) return sum + (i.runtime_minutes as number)
+    if (i.type === 'movie') return sum + 105
+    if (i.type === 'tvshow') return sum + 600
+    if (i.type === 'game') return sum + 1200
+    return sum
+  }, 0)
+  const totalHours = Math.round(totalMinutes / 60)
+
   const comparison = computeComparison(myAll, all)
-  const result: FriendProfileSummary = { profile, stats, recent, favorites, comparison }
+  const result: FriendProfileSummary = { profile, stats, recent, favorites, comparison, totalHours }
   return NextResponse.json(result)
 }
