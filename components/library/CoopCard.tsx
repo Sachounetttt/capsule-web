@@ -107,28 +107,29 @@ export default function CoopCard({ item, index }: Props) {
           </div>
         </Link>
 
-        {/* Info — cliquable vers /shared/[id] */}
-        <Link href={`/shared/${item.id}`} className="flex-1 min-w-0 py-1 block">
-          <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Jeu · Co-op · {item.members.length} joueur{item.members.length > 1 ? 's' : ''}
-          </p>
-          <h3 className="font-semibold text-sm leading-tight mb-2 truncate">{item.title}</h3>
-          <StatusBadge status={item.my_status} />
-        </Link>
+        {/* Info + bouton */}
+        <div className="flex-1 min-w-0 py-1 flex flex-col justify-between">
+          <Link href={`/shared/${item.id}`} className="block">
+            <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Jeu · Co-op · {item.members.length} joueur{item.members.length > 1 ? 's' : ''}
+            </p>
+            <h3 className="font-semibold text-sm leading-tight mb-2 truncate">{item.title}</h3>
+            <StatusBadge status={item.my_status} />
+          </Link>
 
-        {/* Bouton inviter */}
-        <button
-          onClick={openModal}
-          className="flex-shrink-0 flex items-center justify-center rounded-full self-center"
-          style={{
-            width: 32, height: 32,
-            background: 'rgba(139,92,246,0.18)',
-            border: '1px solid rgba(139,92,246,0.35)',
-          }}
-          title="Inviter un ami"
-        >
-          <UserPlus size={14} style={{ color: 'rgba(180,140,255,0.9)' }} />
-        </button>
+          <button
+            onClick={openModal}
+            className="flex items-center gap-1 mt-2 text-xs font-medium rounded-full px-2.5 py-1 self-start"
+            style={{
+              background: 'rgba(139,92,246,0.25)',
+              border: '1px solid rgba(139,92,246,0.5)',
+              color: 'rgba(180,140,255,1)',
+            }}
+          >
+            <UserPlus size={11} />
+            Inviter un ami
+          </button>
+        </div>
       </div>
 
       {/* Modal invitation */}
