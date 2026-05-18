@@ -37,7 +37,7 @@ export default async function HomePage() {
   const { data: friendItems } = friendIds.length > 0
     ? await supabase
         .from('media_items')
-        .select('title, type, year, poster_url, rating, ratings_json')
+        .select('title, type, year, poster_url, rating, ratings_json, user_id')
         .in('user_id', friendIds)
         .eq('wishlist', false)
         .not('poster_url', 'is', null)
@@ -52,7 +52,7 @@ export default async function HomePage() {
   }
 
   const myTitles = new Set(all.map(i => i.title.toLowerCase().trim()))
-  const titleMap = new Map<string, { title: string; type: string; year?: number; poster_url: string; ratings: number[] }>()
+  const titleMap = new Map<string, { title: string; type: string; year?: number; poster_url: string; ratings: number[]; friendIds: string[] }>()
 
   for (const item of friendItems ?? []) {
     const avg = getAvgRating(item)
@@ -60,15 +60,27 @@ export default async function HomePage() {
     const key = item.title.toLowerCase().trim()
     if (myTitles.has(key)) continue
     if (!titleMap.has(key)) {
-      titleMap.set(key, { title: item.title, type: item.type, year: item.year ?? undefined, poster_url: item.poster_url, ratings: [] })
+      titleMap.set(key, { title: item.title, type: item.type, year: item.year ?? undefined, poster_url: item.poster_url, ratings: [], friendIds: [] })
     }
     titleMap.get(key)!.ratings.push(avg)
+    const entry = titleMap.get(key)!
+    const userId = (item as typeof item & { user_id: string }).user_id
+    if (userId && !entry.friendIds.includes(userId)) {
+      entry.friendIds.push(userId)
+    }
   }
 
   const friendsLoved = [...titleMap.values()]
     .map(({ ratings, ...rest }) => ({ ...rest, avgRating: ratings.reduce((a, b) => a + b, 0) / ratings.length }))
     .sort((a, b) => b.avgRating - a.avgRating)
     .slice(0, 12)
+
+  // Collect unique friend IDs that appear in friendsLoved
+  const lovedFriendIds = [...new Set(friendsLoved.flatMap(i => i.friendIds))]
+  const { data: lovedProfiles } = lovedFriendIds.length > 0
+    ? await supabase.from('profiles').select('id, display_name, avatar_url').in('id', lovedFriendIds)
+    : { data: [] }
+  const profileMap = Object.fromEntries((lovedProfiles ?? []).map(p => [p.id, p]))
 
   return (
     <div className="min-h-screen">
@@ -122,6 +134,26 @@ export default async function HomePage() {
                       alt={item.title}
                       className="object-cover w-full h-full"
                     />
+                    {/* Friend avatar badge */}
+                    {item.friendIds[0] && profileMap[item.friendIds[0]] && (
+                      <div className="absolute bottom-1.5 right-1.5">
+                        {profileMap[item.friendIds[0]].avatar_url ? (
+                          <img
+                            src={profileMap[item.friendIds[0]].avatar_url}
+                            alt={profileMap[item.friendIds[0]].display_name}
+                            className="rounded-full"
+                            style={{ width: 22, height: 22, objectFit: 'cover', border: '1.5px solid rgba(255,255,255,0.6)' }}
+                          />
+                        ) : (
+                          <div
+                            className="rounded-full flex items-center justify-center text-white"
+                            style={{ width: 22, height: 22, background: 'var(--color-purple)', border: '1.5px solid rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 700 }}
+                          >
+                            {profileMap[item.friendIds[0]].display_name[0]}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)', width: 112 }}>
                     {item.title}
