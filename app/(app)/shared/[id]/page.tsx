@@ -8,6 +8,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import SharedNotesEditor from '@/components/detail/SharedNotesEditor'
 import CoopStatusActions from '@/components/detail/CoopStatusActions'
 import CoopLeaveButton from '@/components/detail/CoopLeaveButton'
+import CoopInviteButton from '@/components/detail/CoopInviteButton'
 import type { MediaStatus } from '@/lib/types'
 
 export default async function SharedCapsulePage({
@@ -126,6 +127,8 @@ export default async function SharedCapsulePage({
             ))}
           </div>
         </div>
+
+        <CoopInviteButton capsuleId={id} memberIds={userIds} />
 
         <CoopStatusActions capsuleId={id} currentStatus={myMembership.status as MediaStatus} />
 
