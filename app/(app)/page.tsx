@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Library, Clock } from 'lucide-react'
 import StatCard from '@/components/home/StatCard'
 import RecentScroll from '@/components/home/RecentScroll'
@@ -37,7 +38,7 @@ export default async function HomePage() {
   const { data: friendItems } = friendIds.length > 0
     ? await supabase
         .from('media_items')
-        .select('title, type, year, poster_url, rating, ratings_json, user_id')
+        .select('title, type, year, poster_url, rating, ratings_json, user_id, external_id')
         .in('user_id', friendIds)
         .eq('wishlist', false)
         .not('poster_url', 'is', null)
@@ -52,21 +53,21 @@ export default async function HomePage() {
   }
 
   const myTitles = new Set(all.map(i => i.title.toLowerCase().trim()))
-  const titleMap = new Map<string, { title: string; type: string; year?: number; poster_url: string; ratings: number[]; friendIds: string[] }>()
+  const titleMap = new Map<string, { title: string; type: string; year?: number; poster_url: string; external_id?: string; ratings: number[]; friendIds: string[] }>()
 
   for (const item of friendItems ?? []) {
     const avg = getAvgRating(item)
     if (avg === null || avg < 4) continue
     const key = item.title.toLowerCase().trim()
     if (myTitles.has(key)) continue
+    const casted = item as typeof item & { user_id: string; external_id?: string }
     if (!titleMap.has(key)) {
-      titleMap.set(key, { title: item.title, type: item.type, year: item.year ?? undefined, poster_url: item.poster_url, ratings: [], friendIds: [] })
+      titleMap.set(key, { title: item.title, type: item.type, year: item.year ?? undefined, poster_url: item.poster_url, external_id: casted.external_id ?? undefined, ratings: [], friendIds: [] })
     }
     titleMap.get(key)!.ratings.push(avg)
     const entry = titleMap.get(key)!
-    const userId = (item as typeof item & { user_id: string }).user_id
-    if (userId && !entry.friendIds.includes(userId)) {
-      entry.friendIds.push(userId)
+    if (casted.user_id && !entry.friendIds.includes(casted.user_id)) {
+      entry.friendIds.push(casted.user_id)
     }
   }
 
@@ -126,43 +127,48 @@ export default async function HomePage() {
               Vos amis ont adoré
             </h2>
             <div className="flex gap-3 overflow-x-auto pb-2 px-4" style={{ scrollbarWidth: 'none' }}>
-              {friendsLoved.map((item, i) => (
-                <div key={i} className="flex-shrink-0" style={{ width: 112 }}>
-                  <div className="glass rounded-[12px] overflow-hidden relative" style={{ width: 112, height: 160 }}>
-                    <img
-                      src={item.poster_url}
-                      alt={item.title}
-                      className="object-cover w-full h-full"
-                    />
-                    {/* Friend avatar badge */}
-                    {item.friendIds[0] && profileMap[item.friendIds[0]] && (
-                      <div className="absolute bottom-1.5 right-1.5">
-                        {profileMap[item.friendIds[0]].avatar_url ? (
-                          <img
-                            src={profileMap[item.friendIds[0]].avatar_url}
-                            alt={profileMap[item.friendIds[0]].display_name}
-                            className="rounded-full"
-                            style={{ width: 22, height: 22, objectFit: 'cover', border: '1.5px solid rgba(255,255,255,0.6)' }}
-                          />
-                        ) : (
-                          <div
-                            className="rounded-full flex items-center justify-center text-white"
-                            style={{ width: 22, height: 22, background: 'var(--color-purple)', border: '1.5px solid rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 700 }}
-                          >
-                            {profileMap[item.friendIds[0]].display_name[0]}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)', width: 112 }}>
-                    {item.title}
-                  </p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                    {item.avgRating.toFixed(1).replace('.', ',')}/5
-                  </p>
-                </div>
-              ))}
+              {friendsLoved.map((item, i) => {
+                const href = item.external_id
+                  ? `/external/${item.type}/${item.external_id}`
+                  : `/add?q=${encodeURIComponent(item.title)}&type=${item.type}`
+                return (
+                  <Link key={i} href={href} className="flex-shrink-0" style={{ width: 112 }}>
+                    <div className="glass rounded-[12px] overflow-hidden relative" style={{ width: 112, height: 160 }}>
+                      <img
+                        src={item.poster_url}
+                        alt={item.title}
+                        className="object-cover w-full h-full"
+                      />
+                      {/* Friend avatar badge */}
+                      {item.friendIds[0] && profileMap[item.friendIds[0]] && (
+                        <div className="absolute bottom-1.5 right-1.5">
+                          {profileMap[item.friendIds[0]].avatar_url ? (
+                            <img
+                              src={profileMap[item.friendIds[0]].avatar_url}
+                              alt={profileMap[item.friendIds[0]].display_name}
+                              className="rounded-full"
+                              style={{ width: 22, height: 22, objectFit: 'cover', border: '1.5px solid rgba(255,255,255,0.6)' }}
+                            />
+                          ) : (
+                            <div
+                              className="rounded-full flex items-center justify-center text-white"
+                              style={{ width: 22, height: 22, background: 'var(--color-purple)', border: '1.5px solid rgba(255,255,255,0.6)', fontSize: 9, fontWeight: 700 }}
+                            >
+                              {profileMap[item.friendIds[0]].display_name[0]}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)', width: 112 }}>
+                      {item.title}
+                    </p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                      {item.avgRating.toFixed(1).replace('.', ',')}/5
+                    </p>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}
