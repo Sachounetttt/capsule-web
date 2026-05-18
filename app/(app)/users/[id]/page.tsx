@@ -11,6 +11,41 @@ export default function UserProfilePage() {
   const router = useRouter()
   const [data, setData] = useState<FriendProfileSummary | null>(null)
   const [error, setError] = useState(false)
+  const [adding, setAdding] = useState<string | null>(null)
+
+  async function handleAddFromFriend(item: { id: string; title: string; type: string; year?: number; poster_url?: string }) {
+    if (adding) return
+    setAdding(item.id)
+    try {
+      await fetch('/api/media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: item.title,
+          type: item.type,
+          year: item.year,
+          poster_url: item.poster_url,
+          status: 'inProgress',
+          wishlist: false,
+        }),
+      })
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target_user_id: id,
+          type: 'add_from_friend',
+          payload: {
+            media_title: item.title,
+            media_type: item.type,
+            poster_url: item.poster_url ?? null,
+          },
+        }),
+      })
+    } finally {
+      setAdding(null)
+    }
+  }
 
   useEffect(() => {
     fetch(`/api/users/${id}/profile`)
@@ -79,11 +114,20 @@ export default function UserProfilePage() {
           </p>
           <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {recent.map(item => (
-              <div key={item.id} className="flex-shrink-0" style={{ width: 90 }}>
+              <div key={item.id} className="flex-shrink-0 relative" style={{ width: 90 }}>
                 {item.poster_url
                   ? <img src={item.poster_url} className="rounded-xl object-cover" style={{ width: 90, height: 130 }} alt={item.title} />
                   : <div className="rounded-xl" style={{ width: 90, height: 130, background: 'rgba(255,255,255,0.1)' }} />
                 }
+                <button
+                  onClick={() => handleAddFromFriend(item)}
+                  disabled={!!adding}
+                  className="absolute bottom-1 right-1 rounded-full flex items-center justify-center"
+                  style={{ width: 22, height: 22, background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.3)', opacity: adding === item.id ? 0.5 : 1 }}
+                  title="Ajouter à ma bibliothèque"
+                >
+                  <span style={{ fontSize: 16, lineHeight: 1, color: 'white', fontWeight: 300 }}>+</span>
+                </button>
                 <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.title}</p>
               </div>
             ))}
@@ -99,11 +143,20 @@ export default function UserProfilePage() {
           </p>
           <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {favorites.map(item => (
-              <div key={item.id} className="flex-shrink-0" style={{ width: 90 }}>
+              <div key={item.id} className="flex-shrink-0 relative" style={{ width: 90 }}>
                 {item.poster_url
                   ? <img src={item.poster_url} className="rounded-xl object-cover" style={{ width: 90, height: 130 }} alt={item.title} />
                   : <div className="rounded-xl" style={{ width: 90, height: 130, background: 'rgba(255,255,255,0.15)' }} />
                 }
+                <button
+                  onClick={() => handleAddFromFriend(item)}
+                  disabled={!!adding}
+                  className="absolute bottom-1 right-1 rounded-full flex items-center justify-center"
+                  style={{ width: 22, height: 22, background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.3)', opacity: adding === item.id ? 0.5 : 1 }}
+                  title="Ajouter à ma bibliothèque"
+                >
+                  <span style={{ fontSize: 16, lineHeight: 1, color: 'white', fontWeight: 300 }}>+</span>
+                </button>
                 <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{item.title}</p>
               </div>
             ))}

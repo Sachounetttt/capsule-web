@@ -90,8 +90,8 @@ export interface NotificationSharePayload {
 export interface AppNotification {
   id: string
   user_id: string
-  type: 'share' | 'coop_invite' | 'coop_accepted'
-  payload: NotificationSharePayload | CoopInvitePayload | CoopAcceptedPayload
+  type: 'share' | 'coop_invite' | 'coop_accepted' | 'add_from_friend'
+  payload: NotificationSharePayload | CoopInvitePayload | CoopAcceptedPayload | AddFromFriendPayload
   read: boolean
   created_at: string
 }
@@ -145,4 +145,12 @@ export interface CoopAcceptedPayload {
   accepter_name: string
   capsule_id: string
   capsule_title: string
+}
+
+export interface AddFromFriendPayload {
+  adder_id: string
+  adder_name: string
+  media_title: string
+  media_type: MediaType
+  poster_url: string | null
 }

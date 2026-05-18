@@ -23,7 +23,36 @@ export async function POST(req: NextRequest) {
   const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { recipient_id, media_item_id, message } = await req.json()
+  const body = await req.json() as {
+    target_user_id?: string
+    type?: string
+    payload?: Record<string, unknown>
+    recipient_id?: string
+    media_item_id?: string
+    message?: string
+  }
+
+  if (body.type === 'add_from_friend' && body.target_user_id) {
+    const supabase = createServerClient()
+    const { data: myProfile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single()
+
+    await supabase.from('notifications').insert({
+      user_id: body.target_user_id,
+      type: 'add_from_friend',
+      payload: {
+        ...body.payload,
+        adder_id: user.id,
+        adder_name: myProfile?.display_name ?? 'Un ami',
+      },
+    })
+    return NextResponse.json({ ok: true })
+  }
+
+  const { recipient_id, media_item_id, message } = body
 
   if (!recipient_id || !media_item_id) {
     return NextResponse.json({ error: 'recipient_id et media_item_id sont requis' }, { status: 400 })

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import type { AppNotification, CoopInvitePayload, CoopAcceptedPayload, NotificationSharePayload } from '@/lib/types'
+import type { AppNotification, CoopInvitePayload, CoopAcceptedPayload, NotificationSharePayload, AddFromFriendPayload } from '@/lib/types'
 import Loader from '@/components/ui/Loader'
 
 function timeAgo(dateStr: string): string {
@@ -158,6 +158,28 @@ export default function NotificationsPage() {
                   </Link>
                 </p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{timeAgo(notif.created_at)}</p>
+              </div>
+            )
+          }
+
+          if (notif.type === 'add_from_friend') {
+            const p = notif.payload as AddFromFriendPayload
+            return (
+              <div key={notif.id} className="glass rounded-2xl px-4 py-3" style={{
+                background: notif.read ? undefined : 'rgba(124,58,237,0.12)',
+                border: notif.read ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(124,58,237,0.3)',
+              }}>
+                {p.poster_url && (
+                  <img src={p.poster_url} className="rounded-lg object-cover mb-2 float-left mr-3" style={{ width: 44, height: 64 }} alt="" />
+                )}
+                <p className="text-sm leading-snug mb-1">
+                  <span className="font-semibold" style={{ color: 'rgba(139,92,246,1)' }}>{p.adder_name}</span>
+                  {' a ajouté '}
+                  <span className="font-semibold">{p.media_title}</span>
+                  {' depuis ta bibliothèque'}
+                </p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{timeAgo(notif.created_at)}</p>
+                <div className="clear-both" />
               </div>
             )
           }
