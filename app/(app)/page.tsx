@@ -130,7 +130,7 @@ export default async function HomePage() {
               {friendsLoved.map((item, i) => {
                 const href = item.external_id
                   ? `/external/${item.type}/${item.external_id}`
-                  : `/add?q=${encodeURIComponent(item.title)}&type=${item.type}`
+                  : `/external/${item.type}/find?q=${encodeURIComponent(item.title)}`
                 return (
                   <Link key={i} href={href} className="flex-shrink-0" style={{ width: 112 }}>
                     <div className="glass rounded-[12px] overflow-hidden relative" style={{ width: 112, height: 160 }}>
