@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
           ? parseInt((r.first_air_date as string).slice(0, 4))
           : undefined,
       poster_url: r.poster_path ? `${TMDB_IMG}${r.poster_path}` : undefined,
+      external_id: r.id ? String(r.id) : undefined,
     }))
     return NextResponse.json(results)
   } catch {
