@@ -1,11 +1,16 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import DiscoverSection from './DiscoverSection'
 import type { MediaType, SearchResult } from '@/lib/types'
 
+function getHref(item: SearchResult, mediaType: MediaType): string {
+  if (item.external_id) {
+    return `/external/${mediaType}/${item.external_id}`
+  }
+  return `/external/${mediaType}/find?q=${encodeURIComponent(item.title)}`
+}
+
 export default function DiscoverClient() {
-  const router = useRouter()
   const [trendingMovies, setTrendingMovies] = useState<SearchResult[]>([])
   const [trendingSeries, setTrendingSeries] = useState<SearchResult[]>([])
   const [trendingGames, setTrendingGames] = useState<SearchResult[]>([])
@@ -41,39 +46,31 @@ export default function DiscoverClient() {
       .finally(() => setLoadingSimilar(false))
   }, [])
 
-  function navigateToItem(item: SearchResult, mediaType: MediaType) {
-    if (item.external_id) {
-      router.push(`/external/${mediaType}/${item.external_id}`)
-    } else {
-      router.push(`/add?q=${encodeURIComponent(item.title)}&type=${mediaType}`)
-    }
-  }
-
   return (
     <>
       <DiscoverSection
         title="Tendances Films"
         items={trendingMovies}
         loading={loadingMovies}
-        onSelect={item => navigateToItem(item, 'movie')}
+        getHref={item => getHref(item, 'movie')}
       />
       <DiscoverSection
         title="Tendances Séries"
         items={trendingSeries}
         loading={loadingSeries}
-        onSelect={item => navigateToItem(item, 'tvshow')}
+        getHref={item => getHref(item, 'tvshow')}
       />
       <DiscoverSection
         title="Tendances Jeux"
         items={trendingGames}
         loading={loadingGames}
-        onSelect={item => navigateToItem(item, 'game')}
+        getHref={item => getHref(item, 'game')}
       />
       <DiscoverSection
         title="Tu pourrais aimer"
         items={similar}
         loading={loadingSimilar}
-        onSelect={item => navigateToItem(item, 'movie')}
+        getHref={item => getHref(item, 'movie')}
       />
     </>
   )

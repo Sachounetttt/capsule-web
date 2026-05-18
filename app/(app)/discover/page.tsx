@@ -1,8 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import DiscoverSection from '@/components/home/DiscoverSection'
-import QuickAddSheet from '@/components/home/QuickAddSheet'
 import type { MediaType, SearchResult } from '@/lib/types'
+
+function getHref(item: SearchResult, mediaType: MediaType): string {
+  if (item.external_id) return `/external/${mediaType}/${item.external_id}`
+  return `/external/${mediaType}/find?q=${encodeURIComponent(item.title)}`
+}
 
 export default function DiscoverPage() {
   const [trendingMovies, setTrendingMovies] = useState<SearchResult[]>([])
@@ -15,7 +19,6 @@ export default function DiscoverPage() {
   const [loadingTrendingGames, setLoadingTrendingGames] = useState(true)
   const [loadingTopMovies, setLoadingTopMovies] = useState(true)
   const [loadingTopGames, setLoadingTopGames] = useState(true)
-  const [selected, setSelected] = useState<{ item: SearchResult; type: MediaType } | null>(null)
 
   useEffect(() => {
     fetch('/api/trending?type=movie')
@@ -35,45 +38,38 @@ export default function DiscoverPage() {
   }, [])
 
   return (
-    <>
-      <div className="pb-28" style={{ paddingTop: '3.5rem' }}>
-        <h1 className="text-3xl font-bold tracking-tight mb-6 px-4">Découvrir</h1>
-        <DiscoverSection
-          title="Tendances Films"
-          items={trendingMovies}
-          loading={loadingTrendingMovies}
-          onSelect={item => setSelected({ item, type: 'movie' })}
-        />
-        <DiscoverSection
-          title="Tendances Séries"
-          items={trendingSeries}
-          loading={loadingTrendingSeries}
-          onSelect={item => setSelected({ item, type: 'tvshow' })}
-        />
-        <DiscoverSection
-          title="Tendances Jeux"
-          items={trendingGames}
-          loading={loadingTrendingGames}
-          onSelect={item => setSelected({ item, type: 'game' })}
-        />
-        <DiscoverSection
-          title="Les mieux notés — Films"
-          items={topMovies}
-          loading={loadingTopMovies}
-          onSelect={item => setSelected({ item, type: 'movie' })}
-        />
-        <DiscoverSection
-          title="Les mieux notés — Jeux"
-          items={topGames}
-          loading={loadingTopGames}
-          onSelect={item => setSelected({ item, type: 'game' })}
-        />
-      </div>
-      <QuickAddSheet
-        item={selected?.item ?? null}
-        mediaType={selected?.type ?? 'movie'}
-        onClose={() => setSelected(null)}
+    <div className="pb-28" style={{ paddingTop: '3.5rem' }}>
+      <h1 className="text-3xl font-bold tracking-tight mb-6 px-4">Découvrir</h1>
+      <DiscoverSection
+        title="Tendances Films"
+        items={trendingMovies}
+        loading={loadingTrendingMovies}
+        getHref={item => getHref(item, 'movie')}
       />
-    </>
+      <DiscoverSection
+        title="Tendances Séries"
+        items={trendingSeries}
+        loading={loadingTrendingSeries}
+        getHref={item => getHref(item, 'tvshow')}
+      />
+      <DiscoverSection
+        title="Tendances Jeux"
+        items={trendingGames}
+        loading={loadingTrendingGames}
+        getHref={item => getHref(item, 'game')}
+      />
+      <DiscoverSection
+        title="Les mieux notés — Films"
+        items={topMovies}
+        loading={loadingTopMovies}
+        getHref={item => getHref(item, 'movie')}
+      />
+      <DiscoverSection
+        title="Les mieux notés — Jeux"
+        items={topGames}
+        loading={loadingTopGames}
+        getHref={item => getHref(item, 'game')}
+      />
+    </div>
   )
 }
