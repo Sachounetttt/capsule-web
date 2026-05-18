@@ -32,11 +32,21 @@ export async function POST(
     .eq('id', id)
 
   if (accepted) {
-    await supabase.from('shared_capsule_members').insert({
-      capsule_id: invitation.capsule_id,
-      user_id: user.id,
-      status: 'inProgress',
-    })
+    // Defensive check: don't insert if already a member
+    const { data: existingMember } = await supabase
+      .from('shared_capsule_members')
+      .select('id')
+      .eq('capsule_id', invitation.capsule_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (!existingMember) {
+      await supabase.from('shared_capsule_members').insert({
+        capsule_id: invitation.capsule_id,
+        user_id: user.id,
+        status: 'inProgress',
+      })
+    }
 
     const [{ data: capsule }, { data: accepterProfile }] = await Promise.all([
       supabase.from('shared_capsules').select('title').eq('id', invitation.capsule_id).single(),
