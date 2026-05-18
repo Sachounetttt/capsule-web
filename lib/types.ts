@@ -25,6 +25,8 @@ export interface MediaItem {
   ratings_json?: Record<string, CriterionValue>
   wishlist?: boolean
   online?: boolean
+  runtime_minutes?: number
+  external_id?: string
 }
 
 export interface SearchResult {
@@ -38,6 +40,7 @@ export interface SearchResult {
   developer?: string
   community_rating?: number
   community_rating_source?: string
+  external_id?: string
 }
 
 export interface UserProfile {
