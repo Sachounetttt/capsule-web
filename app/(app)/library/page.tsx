@@ -96,39 +96,21 @@ export default function LibraryPage() {
       <div className="flex flex-col gap-3">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <ShimmerCard key={i} className="h-24" />)
-          : <>
-              {/* Personal items — hide games that have a matching coop capsule */}
-              {(() => {
-                const coopTitles = new Set(displayedCoop.map(c => c.title.toLowerCase().trim()))
-                const filteredVisible = (filter === 'all' || filter === 'game')
-                  ? visible.filter(item => !(item.type === 'game' && coopTitles.has(item.title.toLowerCase().trim())))
-                  : visible
-                return filteredVisible.map((item, i) => (
+          : statusFilter === 'coop'
+            ? displayedCoop.length > 0
+              ? displayedCoop.map((item, i) => <CoopCard key={item.id} item={item} index={i} />)
+              : <p className="text-center py-12 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>Aucun jeu co-op</p>
+            : <>
+                {visible.map((item, i) => (
                   <MediaCard key={item.id} item={item} index={i} onDelete={handleDelete} />
-                ))
-              })()}
-
-              {/* Coop section */}
-              {displayedCoop.length > 0 && (
-                <>
-                  <p
-                    className="text-xs font-semibold uppercase tracking-widest mt-2 mb-1"
-                    style={{ color: 'rgba(255,255,255,0.35)' }}
-                  >
-                    Avec vos amis
+                ))}
+                {!loading && displayed.length === 0 && (
+                  <p className="text-center py-12 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    Aucun élément
                   </p>
-                  {displayedCoop.map((item, i) => (
-                    <CoopCard key={item.id} item={item} index={i} />
-                  ))}
-                </>
-              )}
-            </>
+                )}
+              </>
         }
-        {!loading && displayed.length === 0 && displayedCoop.length === 0 && (
-          <p className="text-center py-12 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            Aucun élément
-          </p>
-        )}
       </div>
 
       {!loading && !showAll && displayed.length > 5 && (

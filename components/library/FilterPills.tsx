@@ -2,7 +2,7 @@
 import type { MediaType } from '@/lib/types'
 
 export type Filter = MediaType | 'all' | 'wishlist'
-export type StatusFilter = 'all' | 'completed' | 'inProgress'
+export type StatusFilter = 'all' | 'completed' | 'inProgress' | 'coop'
 
 interface Props {
   filter: Filter
@@ -19,13 +19,17 @@ const filters: { value: Filter; label: string }[] = [
   { value: 'wishlist', label: 'Wishlist' },
 ]
 
-const statusFilters: { value: StatusFilter; label: string }[] = [
+const statusFiltersBase: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'Tous' },
   { value: 'completed', label: 'Terminé' },
   { value: 'inProgress', label: 'En cours' },
 ]
 
 export default function FilterPills({ filter, onFilter, statusFilter, onStatusFilter }: Props) {
+  const statusFilters = filter === 'game'
+    ? [...statusFiltersBase, { value: 'coop' as StatusFilter, label: 'Coop' }]
+    : statusFiltersBase
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
