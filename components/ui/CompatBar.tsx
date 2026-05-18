@@ -14,8 +14,11 @@ export default function CompatBar({ score, myInitials, friendInitials, myName, f
   const [displayed, setDisplayed] = useState(0)
 
   useEffect(() => {
-    const t = setTimeout(() => setDisplayed(score), 120)
-    return () => clearTimeout(t)
+    let id1: number, id2: number
+    id1 = requestAnimationFrame(() => {
+      id2 = requestAnimationFrame(() => setDisplayed(score))
+    })
+    return () => { cancelAnimationFrame(id1); cancelAnimationFrame(id2) }
   }, [score])
 
   const p = displayed / 100
