@@ -8,6 +8,18 @@ const TMDB_BACKDROP = 'https://image.tmdb.org/t/p/w1280'
 const RAWG_BASE = 'https://api.rawg.io/api'
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
+function cleanGameOverview(raw: string): string | null {
+  // RAWG concatenates descriptions in multiple languages — take only the first block
+  const firstBlock = raw.split(/\n\n|\r\n\r\n/)[0] ?? raw
+  // Strip HTML tags and collapse whitespace
+  const text = firstBlock.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim()
+  if (!text || text.length < 20) return null
+  if (text.length <= 600) return text
+  const cut = text.slice(0, 600)
+  const lastSentence = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '))
+  return lastSentence > 100 ? cut.slice(0, lastSentence + 1) : cut.trimEnd() + '…'
+}
+
 interface Actor {
   name: string
   character: string
@@ -87,7 +99,7 @@ async function fetchGameDetails(id: string) {
   const publishers = (d.publishers as { name: string }[] | undefined)?.map(p => p.name) ?? []
   return {
     title: d.name,
-    overview: typeof d.description_raw === 'string' ? d.description_raw : null,
+    overview: typeof d.description_raw === 'string' ? cleanGameOverview(d.description_raw) : null,
     poster_url: typeof d.background_image === 'string' ? d.background_image : null,
     backdrop_url: typeof d.background_image === 'string' ? d.background_image : null,
     year: d.released ? parseInt((d.released as string).slice(0, 4)) : null,
