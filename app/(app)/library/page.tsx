@@ -97,12 +97,31 @@ export default function LibraryPage() {
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <ShimmerCard key={i} className="h-24" />)
           : <>
-              {visible.map((item, i) => (
-                <MediaCard key={item.id} item={item} index={i} onDelete={handleDelete} />
-              ))}
-              {displayedCoop.map((item, i) => (
-                <CoopCard key={item.id} item={item} index={visible.length + i} />
-              ))}
+              {/* Personal items — hide games that have a matching coop capsule */}
+              {(() => {
+                const coopTitles = new Set(displayedCoop.map(c => c.title.toLowerCase().trim()))
+                const filteredVisible = (filter === 'all' || filter === 'game')
+                  ? visible.filter(item => !(item.type === 'game' && coopTitles.has(item.title.toLowerCase().trim())))
+                  : visible
+                return filteredVisible.map((item, i) => (
+                  <MediaCard key={item.id} item={item} index={i} onDelete={handleDelete} />
+                ))
+              })()}
+
+              {/* Coop section */}
+              {displayedCoop.length > 0 && (
+                <>
+                  <p
+                    className="text-xs font-semibold uppercase tracking-widest mt-2 mb-1"
+                    style={{ color: 'rgba(255,255,255,0.35)' }}
+                  >
+                    Avec vos amis
+                  </p>
+                  {displayedCoop.map((item, i) => (
+                    <CoopCard key={item.id} item={item} index={i} />
+                  ))}
+                </>
+              )}
             </>
         }
         {!loading && displayed.length === 0 && displayedCoop.length === 0 && (
