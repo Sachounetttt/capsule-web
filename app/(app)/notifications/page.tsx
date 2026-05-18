@@ -32,6 +32,8 @@ export default function NotificationsPage() {
       if (notifs.status === 'fulfilled') setNotifications(notifs.value.notifications ?? [])
       if (invites.status === 'fulfilled' && Array.isArray(invites.value)) setPendingInvites(invites.value)
       setLoading(false)
+      // Mark all as read after displaying
+      fetch('/api/notifications', { method: 'PATCH' })
     })
   }, [])
 

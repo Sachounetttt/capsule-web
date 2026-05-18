@@ -93,3 +93,17 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(notif, { status: 201 })
 }
+
+export async function PATCH() {
+  const user = await getAuthUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const supabase = createServerClient()
+  await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('user_id', user.id)
+    .eq('read', false)
+
+  return NextResponse.json({ ok: true })
+}

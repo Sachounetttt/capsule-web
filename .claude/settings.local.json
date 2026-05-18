@@ -48,7 +48,13 @@
       "Skill(superpowers:requesting-code-review)",
       "Skill(superpowers:finishing-a-development-branch)",
       "Bash(gh pr create --title 'feat: capsules co-op partagées' --body ' *)",
-      "Bash(where gh *)"
+      "Bash(where gh *)",
+      "Skill(claude-obsidian:save)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Projets-Perso\\\\AppRépertoire\\\\capsule-web\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(git log *)",
+      "Bash(ls supabase/migrations/)",
+      "Bash(dir supabase\\\\migrations)"
     ]
   }
 }
