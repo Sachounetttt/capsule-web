@@ -1,10 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import DiscoverSection from './DiscoverSection'
-import QuickAddSheet from './QuickAddSheet'
 import type { MediaType, SearchResult } from '@/lib/types'
 
 export default function DiscoverClient() {
+  const router = useRouter()
   const [trendingMovies, setTrendingMovies] = useState<SearchResult[]>([])
   const [trendingSeries, setTrendingSeries] = useState<SearchResult[]>([])
   const [trendingGames, setTrendingGames] = useState<SearchResult[]>([])
@@ -13,7 +14,6 @@ export default function DiscoverClient() {
   const [loadingSeries, setLoadingSeries] = useState(true)
   const [loadingGames, setLoadingGames] = useState(true)
   const [loadingSimilar, setLoadingSimilar] = useState(true)
-  const [selected, setSelected] = useState<{ item: SearchResult; type: MediaType } | null>(null)
 
   useEffect(() => {
     fetch('/api/trending?type=movie')
@@ -41,36 +41,39 @@ export default function DiscoverClient() {
       .finally(() => setLoadingSimilar(false))
   }, [])
 
+  function navigateToItem(item: SearchResult, mediaType: MediaType) {
+    if (item.external_id) {
+      router.push(`/external/${mediaType}/${item.external_id}`)
+    } else {
+      router.push(`/add?q=${encodeURIComponent(item.title)}&type=${mediaType}`)
+    }
+  }
+
   return (
     <>
       <DiscoverSection
         title="Tendances Films"
         items={trendingMovies}
         loading={loadingMovies}
-        onSelect={item => setSelected({ item, type: 'movie' })}
+        onSelect={item => navigateToItem(item, 'movie')}
       />
       <DiscoverSection
         title="Tendances Séries"
         items={trendingSeries}
         loading={loadingSeries}
-        onSelect={item => setSelected({ item, type: 'tvshow' })}
+        onSelect={item => navigateToItem(item, 'tvshow')}
       />
       <DiscoverSection
         title="Tendances Jeux"
         items={trendingGames}
         loading={loadingGames}
-        onSelect={item => setSelected({ item, type: 'game' })}
+        onSelect={item => navigateToItem(item, 'game')}
       />
       <DiscoverSection
         title="Tu pourrais aimer"
         items={similar}
         loading={loadingSimilar}
-        onSelect={item => setSelected({ item, type: 'movie' })}
-      />
-      <QuickAddSheet
-        item={selected?.item ?? null}
-        mediaType={selected?.type ?? 'movie'}
-        onClose={() => setSelected(null)}
+        onSelect={item => navigateToItem(item, 'movie')}
       />
     </>
   )
