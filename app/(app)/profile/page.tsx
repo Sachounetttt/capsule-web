@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/browser'
-import { Users, LogOut, Download, Pencil, Check, X, Camera } from 'lucide-react'
+import { Users, LogOut, Download, Pencil, Check, X, Camera, Clock } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 export default function ProfilePage() {
@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [editValue, setEditValue] = useState('')
   const [saving, setSaving] = useState(false)
   const [stats, setStats] = useState({ movies: 0, tvshows: 0, games: 0 })
+  const [totalHours, setTotalHours] = useState(0)
   const [friendCount, setFriendCount] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -42,6 +43,8 @@ export default function ProfilePage() {
           tvshows: items.filter((i: { type: string }) => i.type === 'tvshow').length,
           games: items.filter((i: { type: string }) => i.type === 'game').length,
         })
+        const totalMinutes = (items ?? []).reduce((sum: number, i: { runtime_minutes?: number | null }) => sum + (i.runtime_minutes ?? 0), 0)
+        setTotalHours(Math.round(totalMinutes / 60))
       }
 
       if (friendsRes.ok) {
@@ -214,6 +217,17 @@ export default function ProfilePage() {
           </div>
         ))}
       </div>
+
+      {/* Temps passé */}
+      {totalHours > 0 && (
+        <div className="glass rounded-[20px] p-4 mb-4 flex items-center gap-3">
+          <Clock size={18} style={{ color: 'var(--color-purple)' }} />
+          <div>
+            <p className="text-lg font-bold">{totalHours}h</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>passées sur vos médias</p>
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-col gap-3">
