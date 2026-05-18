@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 
 const TMDB_BASE = 'https://api.themoviedb.org/3'
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w500'
+const TMDB_IMG_W500 = 'https://image.tmdb.org/t/p/w500'
+const TMDB_IMG_W185 = 'https://image.tmdb.org/t/p/w185'
+const TMDB_BACKDROP = 'https://image.tmdb.org/t/p/w1280'
 const RAWG_BASE = 'https://api.rawg.io/api'
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+interface Actor {
+  name: string
+  character: string
+  photo: string | null
+}
 
 async function fetchMovieDetails(id: string) {
   const res = await fetch(
@@ -12,20 +20,27 @@ async function fetchMovieDetails(id: string) {
   )
   if (!res.ok) return null
   const d = await res.json() as Record<string, unknown>
-  const credits = d.credits as { cast?: { name: string }[]; crew?: { job: string; name: string }[] } | undefined
+  const credits = d.credits as {
+    cast?: { name: string; character: string; profile_path: string | null }[]
+    crew?: { job: string; name: string }[]
+  } | undefined
   const director = credits?.crew?.find(c => c.job === 'Director')?.name ?? null
-  const cast = (credits?.cast ?? []).slice(0, 5).map(c => c.name)
+  const actors: Actor[] = (credits?.cast ?? []).slice(0, 3).map(c => ({
+    name: c.name,
+    character: c.character ?? '',
+    photo: c.profile_path ? `${TMDB_IMG_W185}${c.profile_path}` : null,
+  }))
   return {
     title: d.title,
     overview: d.overview ?? null,
-    poster_url: d.poster_path ? `${TMDB_IMG}${d.poster_path}` : null,
-    backdrop_url: d.backdrop_path ? `https://image.tmdb.org/t/p/w780${d.backdrop_path}` : null,
+    poster_url: d.poster_path ? `${TMDB_IMG_W500}${d.poster_path}` : null,
+    backdrop_url: d.backdrop_path ? `${TMDB_BACKDROP}${d.backdrop_path}` : null,
     year: d.release_date ? parseInt((d.release_date as string).slice(0, 4)) : null,
     runtime_minutes: d.runtime ?? null,
     community_rating: d.vote_average ?? null,
     community_rating_source: 'TMDB',
     director,
-    cast,
+    actors,
     genres: (d.genres as { name: string }[] | undefined)?.map(g => g.name) ?? [],
   }
 }
@@ -36,20 +51,28 @@ async function fetchTVDetails(id: string) {
   )
   if (!res.ok) return null
   const d = await res.json() as Record<string, unknown>
-  const credits = d.credits as { cast?: { name: string }[] } | undefined
-  const cast = (credits?.cast ?? []).slice(0, 5).map(c => c.name)
+  const credits = d.credits as {
+    cast?: { name: string; character: string; profile_path: string | null }[]
+  } | undefined
+  const actors: Actor[] = (credits?.cast ?? []).slice(0, 3).map(c => ({
+    name: c.name,
+    character: c.character ?? '',
+    photo: c.profile_path ? `${TMDB_IMG_W185}${c.profile_path}` : null,
+  }))
   const runtimes = d.episode_run_time as number[] | undefined
+  const creators = d.created_by as { name: string }[] | undefined
   return {
     title: d.name,
     overview: d.overview ?? null,
-    poster_url: d.poster_path ? `${TMDB_IMG}${d.poster_path}` : null,
-    backdrop_url: d.backdrop_path ? `https://image.tmdb.org/t/p/w780${d.backdrop_path}` : null,
+    poster_url: d.poster_path ? `${TMDB_IMG_W500}${d.poster_path}` : null,
+    backdrop_url: d.backdrop_path ? `${TMDB_BACKDROP}${d.backdrop_path}` : null,
     year: d.first_air_date ? parseInt((d.first_air_date as string).slice(0, 4)) : null,
     total_seasons: d.number_of_seasons ?? null,
     runtime_minutes: runtimes && runtimes.length > 0 ? runtimes[0] : null,
     community_rating: d.vote_average ?? null,
     community_rating_source: 'TMDB',
-    cast,
+    creators: creators?.map(c => c.name) ?? [],
+    actors,
     genres: (d.genres as { name: string }[] | undefined)?.map(g => g.name) ?? [],
   }
 }
@@ -61,6 +84,7 @@ async function fetchGameDetails(id: string) {
   if (!res.ok) return null
   const d = await res.json() as Record<string, unknown>
   const developers = (d.developers as { name: string }[] | undefined)?.map(dev => dev.name) ?? []
+  const publishers = (d.publishers as { name: string }[] | undefined)?.map(p => p.name) ?? []
   return {
     title: d.name,
     overview: typeof d.description_raw === 'string' ? d.description_raw : null,
@@ -72,6 +96,7 @@ async function fetchGameDetails(id: string) {
     community_rating_source: 'RAWG',
     developer: developers[0] ?? null,
     studios: developers,
+    publishers,
     genres: (d.genres as { name: string }[] | undefined)?.map(g => g.name) ?? [],
     platforms: (d.platforms as { platform: { name: string } }[] | undefined)?.map(p => p.platform.name) ?? [],
   }
@@ -89,7 +114,6 @@ export async function GET(
 
   const supabase = createServerClient()
 
-  // Check cache
   const { data: cached } = await supabase
     .from('media_cache')
     .select('data, cached_at')
@@ -99,12 +123,13 @@ export async function GET(
 
   if (cached) {
     const age = Date.now() - new Date(cached.cached_at).getTime()
-    if (age < CACHE_TTL_MS) {
+    // Invalidate old cache entries that don't have actors (pre-redesign)
+    const hasActors = (cached.data as Record<string, unknown>).actors !== undefined
+    if (age < CACHE_TTL_MS && hasActors) {
       return NextResponse.json(cached.data)
     }
   }
 
-  // Fetch from API
   let data: Record<string, unknown> | null = null
   if (type === 'movie') data = await fetchMovieDetails(id)
   else if (type === 'tvshow') data = await fetchTVDetails(id)
@@ -112,7 +137,6 @@ export async function GET(
 
   if (!data) return NextResponse.json({ error: 'Introuvable' }, { status: 404 })
 
-  // Upsert cache
   await supabase.from('media_cache').upsert({
     external_id: id,
     media_type: type,

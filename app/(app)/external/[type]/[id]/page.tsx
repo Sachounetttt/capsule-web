@@ -1,7 +1,13 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Star, Clock } from 'lucide-react'
+import { ArrowLeft, Star, Clock, Tv } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
+
+interface Actor {
+  name: string
+  character: string
+  photo: string | null
+}
 
 interface ExternalDetail {
   title: string
@@ -13,9 +19,11 @@ interface ExternalDetail {
   community_rating?: number | null
   community_rating_source?: string | null
   director?: string | null
-  cast?: string[]
+  creators?: string[]
+  actors?: Actor[]
   developer?: string | null
   studios?: string[]
+  publishers?: string[]
   genres?: string[]
   platforms?: string[]
   total_seasons?: number | null
@@ -34,7 +42,9 @@ function formatRuntime(minutes: number, type: string): string {
 }
 
 const TMDB_BASE = 'https://api.themoviedb.org/3'
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w500'
+const TMDB_IMG_W500 = 'https://image.tmdb.org/t/p/w500'
+const TMDB_IMG_W185 = 'https://image.tmdb.org/t/p/w185'
+const TMDB_BACKDROP = 'https://image.tmdb.org/t/p/w1280'
 const RAWG_BASE = 'https://api.rawg.io/api'
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -46,20 +56,27 @@ async function fetchFromSource(type: string, id: string): Promise<ExternalDetail
     )
     if (!res.ok) return null
     const d = await res.json() as Record<string, unknown>
-    const credits = d.credits as { cast?: { name: string }[]; crew?: { job: string; name: string }[] } | undefined
+    const credits = d.credits as {
+      cast?: { name: string; character: string; profile_path: string | null }[]
+      crew?: { job: string; name: string }[]
+    } | undefined
     const director = credits?.crew?.find(c => c.job === 'Director')?.name ?? null
-    const cast = (credits?.cast ?? []).slice(0, 5).map(c => c.name)
+    const actors: Actor[] = (credits?.cast ?? []).slice(0, 3).map(c => ({
+      name: c.name,
+      character: c.character ?? '',
+      photo: c.profile_path ? `${TMDB_IMG_W185}${c.profile_path}` : null,
+    }))
     return {
       title: d.title as string,
       overview: typeof d.overview === 'string' ? d.overview : null,
-      poster_url: d.poster_path ? `${TMDB_IMG}${d.poster_path}` : null,
-      backdrop_url: d.backdrop_path ? `https://image.tmdb.org/t/p/w780${d.backdrop_path}` : null,
+      poster_url: d.poster_path ? `${TMDB_IMG_W500}${d.poster_path}` : null,
+      backdrop_url: d.backdrop_path ? `${TMDB_BACKDROP}${d.backdrop_path}` : null,
       year: d.release_date ? parseInt((d.release_date as string).slice(0, 4)) : null,
       runtime_minutes: typeof d.runtime === 'number' ? d.runtime : null,
       community_rating: typeof d.vote_average === 'number' ? d.vote_average : null,
       community_rating_source: 'TMDB',
       director,
-      cast,
+      actors,
       genres: (d.genres as { name: string }[] | undefined)?.map(g => g.name) ?? [],
     }
   }
@@ -70,20 +87,28 @@ async function fetchFromSource(type: string, id: string): Promise<ExternalDetail
     )
     if (!res.ok) return null
     const d = await res.json() as Record<string, unknown>
-    const credits = d.credits as { cast?: { name: string }[] } | undefined
-    const cast = (credits?.cast ?? []).slice(0, 5).map(c => c.name)
+    const credits = d.credits as {
+      cast?: { name: string; character: string; profile_path: string | null }[]
+    } | undefined
+    const actors: Actor[] = (credits?.cast ?? []).slice(0, 3).map(c => ({
+      name: c.name,
+      character: c.character ?? '',
+      photo: c.profile_path ? `${TMDB_IMG_W185}${c.profile_path}` : null,
+    }))
     const runtimes = d.episode_run_time as number[] | undefined
+    const creators = d.created_by as { name: string }[] | undefined
     return {
       title: d.name as string,
       overview: typeof d.overview === 'string' ? d.overview : null,
-      poster_url: d.poster_path ? `${TMDB_IMG}${d.poster_path}` : null,
-      backdrop_url: d.backdrop_path ? `https://image.tmdb.org/t/p/w780${d.backdrop_path}` : null,
+      poster_url: d.poster_path ? `${TMDB_IMG_W500}${d.poster_path}` : null,
+      backdrop_url: d.backdrop_path ? `${TMDB_BACKDROP}${d.backdrop_path}` : null,
       year: d.first_air_date ? parseInt((d.first_air_date as string).slice(0, 4)) : null,
       total_seasons: typeof d.number_of_seasons === 'number' ? d.number_of_seasons : null,
       runtime_minutes: runtimes && runtimes.length > 0 ? runtimes[0] : null,
       community_rating: typeof d.vote_average === 'number' ? d.vote_average : null,
       community_rating_source: 'TMDB',
-      cast,
+      creators: creators?.map(c => c.name) ?? [],
+      actors,
       genres: (d.genres as { name: string }[] | undefined)?.map(g => g.name) ?? [],
     }
   }
@@ -95,6 +120,7 @@ async function fetchFromSource(type: string, id: string): Promise<ExternalDetail
     if (!res.ok) return null
     const d = await res.json() as Record<string, unknown>
     const developers = (d.developers as { name: string }[] | undefined)?.map(dev => dev.name) ?? []
+    const publishers = (d.publishers as { name: string }[] | undefined)?.map(p => p.name) ?? []
     return {
       title: d.name as string,
       overview: typeof d.description_raw === 'string' ? d.description_raw : null,
@@ -106,6 +132,7 @@ async function fetchFromSource(type: string, id: string): Promise<ExternalDetail
       community_rating_source: 'RAWG',
       developer: developers[0] ?? null,
       studios: developers,
+      publishers,
       genres: (d.genres as { name: string }[] | undefined)?.map(g => g.name) ?? [],
       platforms: (d.platforms as { platform: { name: string } }[] | undefined)?.map(p => p.platform.name) ?? [],
     }
@@ -119,12 +146,10 @@ export default async function ExternalDetailPage({
   params: Promise<{ type: string; id: string }>
 }) {
   const { type, id } = await params
-
   if (!['movie', 'tvshow', 'game'].includes(type)) notFound()
 
   const supabase = createServerClient()
 
-  // Check Supabase cache first
   const { data: cached } = await supabase
     .from('media_cache')
     .select('data, cached_at')
@@ -136,7 +161,8 @@ export default async function ExternalDetailPage({
 
   if (cached) {
     const age = Date.now() - new Date(cached.cached_at as string).getTime()
-    if (age < CACHE_TTL_MS) {
+    const hasActors = (cached.data as Record<string, unknown>).actors !== undefined
+    if (age < CACHE_TTL_MS && hasActors) {
       detail = cached.data as ExternalDetail
     }
   }
@@ -144,7 +170,6 @@ export default async function ExternalDetailPage({
   if (!detail) {
     detail = await fetchFromSource(type, id)
     if (detail) {
-      // Store in cache for next time
       await supabase.from('media_cache').upsert({
         external_id: id,
         media_type: type,
@@ -156,144 +181,117 @@ export default async function ExternalDetailPage({
 
   if (!detail) notFound()
 
+  const heroImg = detail.backdrop_url ?? detail.poster_url
   const addQuery = new URLSearchParams({ q: detail.title ?? '', type })
+  const isFilmOrSerie = type === 'movie' || type === 'tvshow'
 
   return (
-    <div className="min-h-screen pb-32">
-      {/* Backdrop */}
-      {detail.backdrop_url && (
-        <div className="relative h-56 overflow-hidden">
-          <img src={detail.backdrop_url} alt="" className="w-full h-full object-cover" />
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, transparent 30%, #07070d)' }}
-          />
-        </div>
-      )}
+    <div className="min-h-screen pb-36">
 
-      {/* Back button */}
-      <div className="fixed top-0 left-0 right-0 z-10 px-4 pt-12">
+      {/* ── Hero backdrop ── */}
+      <div className="relative overflow-hidden" style={{ height: 300 }}>
+        {heroImg && (
+          <img
+            src={heroImg}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+        {/* gradient fort vers le bas */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(7,7,13,0.15) 0%, rgba(7,7,13,0.5) 50%, #07070d 100%)',
+          }}
+        />
+        {/* Back button */}
         <Link
           href="/"
-          className="glass rounded-full flex items-center justify-center"
-          style={{ width: 36, height: 36 }}
+          className="absolute glass rounded-full flex items-center justify-center"
+          style={{ top: '3rem', left: '1rem', width: 36, height: 36, zIndex: 10 }}
         >
           <ArrowLeft size={18} />
         </Link>
       </div>
 
-      <div
-        className="px-4 relative z-10"
-        style={{ marginTop: detail.backdrop_url ? '-2rem' : '5rem' }}
-      >
-        {/* Type + year + director/developer */}
-        <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {typeLabel[type] ?? type}
-          {detail.year ? ` · ${detail.year}` : ''}
-          {detail.director ? ` · Réal. ${detail.director}` : ''}
-          {detail.developer ? ` · ${detail.developer}` : ''}
-        </p>
+      {/* ── Poster flottant + titre ── */}
+      <div className="px-4 relative z-10" style={{ marginTop: '-4rem' }}>
+        <div className="flex gap-4 mb-5">
 
-        {/* Title */}
-        <h1 className="text-2xl font-bold tracking-tight mb-3">{detail.title}</h1>
+          {/* Affiche portrait */}
+          {detail.poster_url && (
+            <div className="flex-shrink-0 rounded-[14px] overflow-hidden shadow-2xl" style={{ width: 110, height: 165 }}>
+              <img
+                src={detail.poster_url}
+                alt={detail.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
 
-        {/* Meta pills */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {detail.community_rating != null && (
-            <span
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded-full"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}
-            >
-              <Star size={10} />
-              {(detail.community_rating as number).toFixed(1)} · {detail.community_rating_source}
-            </span>
-          )}
-          {detail.runtime_minutes != null && (
-            <span
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded-full"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}
-            >
-              <Clock size={10} />
-              {formatRuntime(detail.runtime_minutes as number, type)}
-            </span>
-          )}
-          {detail.total_seasons != null && (
-            <span
-              className="text-xs px-2 py-1 rounded-full"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}
-            >
-              {detail.total_seasons} saison{(detail.total_seasons as number) > 1 ? 's' : ''}
-            </span>
-          )}
+          {/* Titre + meta */}
+          <div className="flex flex-col justify-end pb-1 min-w-0">
+            <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {typeLabel[type] ?? type}{detail.year ? ` · ${detail.year}` : ''}
+            </p>
+            <h1 className="text-xl font-bold tracking-tight leading-tight mb-2">
+              {detail.title}
+            </h1>
+
+            {/* Note */}
+            {detail.community_rating != null && (
+              <div className="flex items-center gap-1 mb-1">
+                <Star size={12} fill="rgba(255,200,50,0.9)" stroke="none" />
+                <span className="text-sm font-semibold" style={{ color: 'rgba(255,200,50,0.9)' }}>
+                  {(detail.community_rating as number).toFixed(1)}
+                </span>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  / 10 · {detail.community_rating_source}
+                </span>
+              </div>
+            )}
+
+            {/* Durée / Saisons */}
+            <div className="flex flex-wrap gap-2">
+              {detail.runtime_minutes != null && (
+                <span className="flex items-center gap-1 text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <Clock size={10} />
+                  {formatRuntime(detail.runtime_minutes as number, type)}
+                </span>
+              )}
+              {detail.total_seasons != null && (
+                <span className="flex items-center gap-1 text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <Tv size={10} />
+                  {detail.total_seasons} saison{(detail.total_seasons as number) > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+
+            {/* Réalisateur / Créateurs */}
+            {detail.director && (
+              <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Réal. <span style={{ color: 'rgba(255,255,255,0.7)' }}>{detail.director}</span>
+              </p>
+            )}
+            {detail.creators && detail.creators.length > 0 && (
+              <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Créé par <span style={{ color: 'rgba(255,255,255,0.7)' }}>{detail.creators.join(', ')}</span>
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Synopsis */}
-        {detail.overview && (
-          <div className="glass rounded-[20px] p-4 mb-4">
-            <p
-              className="text-xs uppercase tracking-widest mb-2"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              Synopsis
-            </p>
-            <p
-              className="text-sm leading-relaxed"
-              style={{ color: 'rgba(255,255,255,0.8)' }}
-            >
-              {detail.overview}
-            </p>
-          </div>
-        )}
-
-        {/* Cast */}
-        {detail.cast && detail.cast.length > 0 && (
-          <div className="glass rounded-[20px] p-4 mb-4">
-            <p
-              className="text-xs uppercase tracking-widest mb-2"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              Acteurs principaux
-            </p>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {detail.cast.join(', ')}
-            </p>
-          </div>
-        )}
-
-        {/* Studios */}
-        {detail.studios && detail.studios.length > 0 && (
-          <div className="glass rounded-[20px] p-4 mb-4">
-            <p
-              className="text-xs uppercase tracking-widest mb-2"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              Studio
-            </p>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {detail.studios.join(', ')}
-            </p>
-          </div>
-        )}
-
-        {/* Genres */}
+        {/* ── Genres ── */}
         {detail.genres && detail.genres.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-5">
             {detail.genres.map(g => (
               <span
                 key={g}
-                className="text-xs px-2 py-1 rounded-full"
+                className="text-xs px-2.5 py-1 rounded-full"
                 style={{
                   background: 'rgba(139,92,246,0.15)',
                   border: '1px solid rgba(139,92,246,0.3)',
+                  color: 'rgba(180,140,255,0.9)',
                 }}
               >
                 {g}
@@ -302,17 +300,98 @@ export default async function ExternalDetailPage({
           </div>
         )}
 
-        {/* Add to library CTA */}
+        {/* ── Synopsis ── */}
+        {detail.overview && (
+          <div className="glass rounded-[20px] p-4 mb-5">
+            <p className="text-xs uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Synopsis
+            </p>
+            <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.82)' }}>
+              {detail.overview}
+            </p>
+          </div>
+        )}
+
+        {/* ── Acteurs (films & séries uniquement) ── */}
+        {isFilmOrSerie && detail.actors && detail.actors.length > 0 && (
+          <div className="mb-5">
+            <p className="text-xs uppercase tracking-widest mb-3 px-0" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Acteurs principaux
+            </p>
+            <div className="flex gap-4" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+              {detail.actors.map((actor, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5 flex-shrink-0" style={{ width: 76 }}>
+                  {actor.photo ? (
+                    <img
+                      src={actor.photo}
+                      alt={actor.name}
+                      className="rounded-full object-cover"
+                      style={{ width: 64, height: 64, objectFit: 'cover', border: '2px solid rgba(255,255,255,0.12)' }}
+                    />
+                  ) : (
+                    <div
+                      className="rounded-full flex items-center justify-center text-base font-bold"
+                      style={{ width: 64, height: 64, background: 'rgba(139,92,246,0.25)', border: '2px solid rgba(139,92,246,0.3)', color: 'rgba(180,140,255,0.9)' }}
+                    >
+                      {actor.name[0]}
+                    </div>
+                  )}
+                  <p
+                    className="text-xs text-center leading-tight font-semibold"
+                    style={{ color: 'rgba(255,255,255,0.88)', width: 76 }}
+                  >
+                    {actor.name}
+                  </p>
+                  {actor.character && (
+                    <p
+                      className="text-xs text-center leading-tight"
+                      style={{ color: 'rgba(255,255,255,0.38)', width: 76, marginTop: -2 }}
+                    >
+                      {actor.character}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Infos jeu ── */}
+        {type === 'game' && (detail.studios?.length || detail.publishers?.length || detail.platforms?.length) && (
+          <div className="glass rounded-[20px] p-4 mb-5 flex flex-col gap-3">
+            {detail.studios && detail.studios.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Développeur</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>{detail.studios.join(', ')}</p>
+              </div>
+            )}
+            {detail.publishers && detail.publishers.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Éditeur</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>{detail.publishers.join(', ')}</p>
+              </div>
+            )}
+            {detail.platforms && detail.platforms.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Plateformes</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{detail.platforms.slice(0, 5).join(', ')}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── CTAs ── */}
         <Link
           href={`/add?${addQuery}`}
-          className="w-full rounded-[16px] py-4 flex items-center justify-center gap-2 text-sm font-semibold mb-3"
+          className="w-full rounded-[16px] py-4 flex items-center justify-center text-sm font-semibold mb-3"
           style={{ background: 'var(--color-purple)' }}
         >
           Ajouter à ma bibliothèque
         </Link>
         <Link
           href={`/add?${addQuery}&wishlist=true`}
-          className="w-full glass rounded-[16px] py-3 flex items-center justify-center gap-2 text-sm font-medium"
+          className="w-full glass rounded-[16px] py-3 flex items-center justify-center text-sm font-medium"
+          style={{ border: '1px solid rgba(255,255,255,0.1)' }}
         >
           Ajouter à la wishlist
         </Link>
