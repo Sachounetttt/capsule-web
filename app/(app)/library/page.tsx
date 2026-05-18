@@ -48,7 +48,7 @@ export default function LibraryPage() {
   }, [items, wishlistItems, filter, statusFilter, query])
 
   const displayedCoop = useMemo(() => {
-    if (filter === 'wishlist' || (filter !== 'all' && filter !== 'game')) return []
+    if (filter !== 'game') return []
     if (query) return coopCapsules.filter(c => c.title.toLowerCase().includes(query.toLowerCase()))
     return coopCapsules
   }, [coopCapsules, filter, query])
