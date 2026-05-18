@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [stats, setStats] = useState({ movies: 0, tvshows: 0, games: 0 })
   const [totalHours, setTotalHours] = useState(0)
+  const [timeEstimated, setTimeEstimated] = useState(false)
   const [friendCount, setFriendCount] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -43,8 +44,17 @@ export default function ProfilePage() {
           tvshows: items.filter((i: { type: string }) => i.type === 'tvshow').length,
           games: items.filter((i: { type: string }) => i.type === 'game').length,
         })
-        const totalMinutes = (items ?? []).reduce((sum: number, i: { runtime_minutes?: number | null }) => sum + (i.runtime_minutes ?? 0), 0)
+        const hasRealData = items.some((i: { runtime_minutes?: number | null }) => i.runtime_minutes)
+        const totalMinutes = (items ?? []).reduce((sum: number, i: { type: string; runtime_minutes?: number | null }) => {
+          if (i.runtime_minutes) return sum + i.runtime_minutes
+          // Estimation par type si pas de donnée réelle
+          if (i.type === 'movie') return sum + 105   // ~1h45 moyenne film
+          if (i.type === 'tvshow') return sum + 600  // ~10h moyenne série
+          if (i.type === 'game') return sum + 1200   // ~20h moyenne jeu
+          return sum
+        }, 0)
         setTotalHours(Math.round(totalMinutes / 60))
+        setTimeEstimated(!hasRealData)
       }
 
       if (friendsRes.ok) {
@@ -220,11 +230,13 @@ export default function ProfilePage() {
 
       {/* Temps passé */}
       {totalHours > 0 && (
-        <div className="glass rounded-[20px] p-4 mb-4 flex items-center gap-3">
+        <div className="glass rounded-[20px] p-4 flex items-center gap-3">
           <Clock size={18} style={{ color: 'var(--color-purple)' }} />
           <div>
-            <p className="text-lg font-bold">{totalHours}h</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>passées sur vos médias</p>
+            <p className="text-lg font-bold">{timeEstimated ? '~' : ''}{totalHours}h</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              passées sur vos médias{timeEstimated ? ' · estimation' : ''}
+            </p>
           </div>
         </div>
       )}
